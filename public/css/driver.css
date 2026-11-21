@@ -1,0 +1,348 @@
+/* ==========================================================================
+   DRIVER DASHBOARD & FORM STYLES (SESUAI DOKUMENTASI FIGMA DRIVER)
+   KPI TOKO ROTI WONOSARI - CAPAIAN.ID
+   ========================================================================== */
+
+@import url('frontliner.css');
+
+/* ==========================================================================
+   1. Dashboard Specific: Donut Chart with Right Progress Bars
+   ========================================================================== */
+.driver-chart-inner-card {
+  background: var(--primary-50);
+  border: 1px solid var(--secondary-100);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.driver-chart-left {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.driver-donut-svg {
+  width: 96px;
+  height: 96px;
+  transform: rotate(-9deg);
+}
+
+.driver-donut-track {
+  fill: none;
+  stroke: var(--neutral-300);
+  stroke-width: 9;
+}
+
+.driver-donut-progress {
+  fill: none;
+  stroke: var(--success-500);
+  stroke-width: 9;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.8s ease;
+}
+
+.driver-donut-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1;
+}
+
+.driver-donut-val {
+  font-size: var(--fs-22);
+  font-weight: var(--fw-semibold);
+  color: var(--neutral-900);
+  letter-spacing: -0.02em;
+}
+
+.driver-donut-sub {
+  font-size: var(--fs-10);
+  font-weight: 600;
+  color: var(--neutral-500);
+  margin-top: 2px;
+}
+
+.driver-progress-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.driver-progress-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.driver-progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--fs-12);
+  color: var(--neutral-900);
+  line-height: 1.2;
+}
+
+.driver-progress-header strong {
+  font-weight: var(--fw-semibold);
+}
+
+.driver-progress-count {
+  font-weight: var(--fw-semibold);
+  color: var(--neutral-600);
+}
+
+.driver-progress-bar-bg {
+  width: 100%;
+  height: 6px;
+  background: var(--neutral-300);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.driver-progress-bar-fill {
+  height: 100%;
+  background: var(--primary-500);
+  border-radius: 9999px;
+  transition: width 0.4s ease;
+}
+
+/* 2. Preview 4 Cards 2x2 Grid */
+.driver-preview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.driver-preview-card {
+  background: var(--primary-50);
+  border: 1px solid var(--secondary-100);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+
+.driver-preview-card:hover {
+  background: var(--primary-50);
+  border-color: var(--neutral-300);
+  transform: translateY(-1px);
+}
+
+.driver-preview-card-title {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  color: var(--neutral-900);
+  line-height: 1.25;
+}
+
+/* 3. Steps Multi-indicator (4 Bar) */
+.driver-steps-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  width: 120px;
+}
+
+.driver-step-pill {
+  height: 5px;
+  border-radius: 9999px;
+  background: var(--neutral-300);
+  transition: background-color 0.2s ease;
+}
+
+.driver-step-pill.is-active {
+  background: var(--primary-500);
+}
+
+/* 4. Drawer Menu Cards Sesuai Menu.png */
+.driver-drawer-menu-card {
+  background: var(--secondary-50);
+  border: 1px solid var(--secondary-100);
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-decoration: none;
+  color: var(--neutral-900);
+  transition: all 0.2s ease;
+}
+
+.driver-drawer-menu-card:hover {
+  background: var(--primary-50);
+  border-color: var(--neutral-300);
+}
+
+.driver-drawer-menu-card.is-active {
+  background: var(--secondary-50);
+  border-color: var(--primary-500);
+}
+
+.driver-drawer-menu-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.driver-drawer-menu-icon {
+  width: 22px;
+  height: 22px;
+  color: var(--neutral-900);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.driver-drawer-menu-title {
+  font-size: var(--fs-16);
+  font-weight: var(--fw-semibold);
+  color: var(--neutral-900);
+}
+
+.driver-drawer-footer-chip {
+  background: var(--secondary-50);
+  border: 1px solid var(--secondary-100);
+  border-radius: 14px;
+  padding: 12px 16px;
+  font-size: var(--fs-12);
+  font-weight: 500;
+  color: var(--neutral-500);
+  text-align: left;
+  margin-top: auto;
+}
+
+/* 5. Custom Clickable Checkbox Cards */
+.driver-check-card {
+  background: var(--white);
+  border: 1px solid var(--secondary-100);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  user-select: none;
+}
+
+.driver-check-card:hover {
+  border-color: var(--neutral-300);
+  background: var(--neutral-50);
+}
+
+.driver-check-card.is-checked {
+  background: var(--secondary-50);
+  border-color: var(--primary-500);
+}
+
+.driver-check-box {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  border: 2px solid var(--warning-700);
+  background: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+  transition: all 0.15s ease;
+}
+
+.driver-check-card.is-checked .driver-check-box {
+  background: var(--primary-600);
+  border-color: var(--primary-600);
+}
+
+.driver-check-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--white);
+  opacity: 0;
+  transform: scale(0.6);
+  transition: all 0.15s ease;
+}
+
+.driver-check-card.is-checked .driver-check-icon {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.driver-check-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.driver-check-title {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  color: var(--neutral-900);
+  line-height: 1.3;
+}
+
+.driver-check-sub {
+  font-size: var(--fs-12);
+  font-weight: 500;
+  color: var(--neutral-500);
+  line-height: 1.4;
+}
+
+/* 6. Dashed Notice Bottom Box */
+.driver-notice-dashed {
+  background: var(--secondary-50);
+  border: 1px dashed var(--primary-700);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: var(--fs-12);
+  color: var(--neutral-600);
+  line-height: 1.45;
+  margin: 18px 0 20px;
+}
+
+.driver-notice-dashed svg {
+  color: var(--neutral-500);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* 7. Category Icons for Driver Detail Riwayat */
+.driver-cat-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--primary-50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--neutral-900);
+}
+
+.driver-cat-icon-box.is-orange {
+  background: var(--secondary-50);
+  color: var(--primary-600);
+}
+

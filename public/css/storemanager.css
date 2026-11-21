@@ -1,0 +1,1401 @@
+/* ==========================================================================
+   STORE MANAGER DASHBOARD & FORM STYLES (SESUAI DOKUMENTASI FIGMA STORE MANAGER)
+   KPI TOKO ROTI WONOSARI - CAPAIAN.ID
+   ========================================================================== */
+
+@import url('frontliner.css');
+
+/* ==========================================================================
+   1. Segmented Tab Bar (KPI Saya & KPI Tim) Sesuai Figma
+   ========================================================================== */
+.sm-tab-container {
+  display: flex;
+  align-items: center;
+  background: var(--secondary-100);
+  border: 1px solid var(--secondary-100);
+  border-radius: 16px;
+  padding: 4px;
+  margin-bottom: 20px;
+  gap: 4px;
+}
+
+.sm-tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  color: var(--neutral-500);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-14);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sm-tab-btn:hover {
+  color: var(--neutral-900);
+}
+
+.sm-tab-btn.is-active {
+  background: var(--white);
+  color: var(--neutral-900);
+  border: 1px solid var(--secondary-100);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.sm-tab-badge {
+  background: var(--primary-100);
+  color: var(--primary-700);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  padding: 1px 7px;
+  border-radius: 999px;
+  display: inline-block;
+  line-height: 1.3;
+}
+
+/* ==========================================================================
+   2. Donut Card with 5 Progress Bars (KPI Saya)
+   ========================================================================== */
+.sm-donut-inner-card {
+  background: var(--primary-50);
+  border: 1px solid var(--secondary-100);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.sm-chart-left {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sm-donut-svg {
+  width: 96px;
+  height: 96px;
+  transform: rotate(-90deg);
+}
+
+.sm-donut-track {
+  fill: none;
+  stroke: var(--neutral-300);
+  stroke-width: 9;
+}
+
+.sm-donut-progress {
+  fill: none;
+  stroke: var(--success-500);
+  stroke-width: 9;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.8s ease;
+}
+
+.sm-donut-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1;
+}
+
+.sm-donut-val {
+  font-size: var(--fs-22);
+  font-weight: var(--fw-semibold);
+  color: var(--neutral-900);
+  letter-spacing: -0.02em;
+}
+
+.sm-donut-sub {
+  font-size: var(--fs-10);
+  font-weight: 600;
+  color: var(--neutral-500);
+  margin-top: 2px;
+}
+
+.sm-progress-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.sm-progress-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sm-progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--fs-12);
+  color: var(--neutral-900);
+  line-height: 1.2;
+}
+
+.sm-progress-header strong {
+  font-weight: var(--fw-semibold);
+  color: var(--neutral-900);
+}
+
+.sm-progress-header span {
+  font-size: var(--fs-12);
+  font-weight: 600;
+  color: var(--neutral-500);
+}
+
+.sm-bar-track {
+  width: 100%;
+  height: 5px;
+  background: var(--secondary-100);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.sm-bar-fill {
+  height: 100%;
+  background: var(--primary-500);
+  border-radius: 999px;
+  transition: width 0.6s ease;
+}
+
+/* ==========================================================================
+   3. KPI Tim Specific: Banner & Overview
+   ========================================================================== */
+.sm-team-pending-banner {
+  background: var(--secondary-50);
+  border: 1px solid var(--primary-200);
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-decoration: none;
+  color: inherit;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.06);
+  transition: all 0.2s ease;
+}
+
+.sm-team-pending-banner:hover {
+  border-color: var(--primary-500);
+  transform: translateY(-1px);
+}
+
+.sm-team-pending-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sm-team-pending-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--primary-100);
+  color: var(--primary-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sm-team-pending-title {
+  font-size: var(--fs-16);
+  font-weight: var(--fw-semibold);
+  color: var(--neutral-900);
+  margin: 0;
+}
+
+.sm-team-pending-sub {
+  font-size: var(--fs-12);
+  color: var(--neutral-500);
+  margin-top: 2px;
+}
+
+.sm-team-arrow-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary-600);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Ringkasan Tim Card */
+.sm-team-summary-box {
+  background: var(--white);
+  border: 1px solid var(--secondary-100);
+  border-radius: 18px;
+  padding: 18px;
+  margin-bottom: 24px;
+}
+
+.sm-team-summary-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.sm-team-summary-title {
+  font-size: var(--fs-16);
+  font-weight: var(--fw-semibold);
+  color: var(--neutral-900);
+  margin: 0;
+}
+
+.sm-team-summary-shift {
+  font-size: var(--fs-12);
+  font-weight: 600;
+  color: var(--neutral-500);
+}
+
+.sm-team-summary-mid {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--fs-14);
+  color: var(--neutral-900);
+  margin-bottom: 8px;
+}
+
+.sm-team-summary-mid strong {
+  font-weight: var(--fw-semibold);
+}
+
+.sm-team-bar-track {
+  width: 100%;
+  height: 8px;
+  background: var(--secondary-100);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.sm-team-bar-fill {
+  height: 100%;
+  background: var(--primary-500);
+  border-radius: 999px;
+  transition: width 0.6s ease;
+}
+
+.sm-team-counts-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  font-size: var(--fs-12);
+  color: var(--neutral-500);
+}
+
+.sm-team-count-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Daftar Karyawan */
+.sm-team-member-card {
+  background: var(--secondary-50);
+  border: 1px solid var(--secondary-100);
+  border-radius: 16px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+
+.sm-team-member-card:hover {
+  background: var(--primary-50);
+  border-color: var(--primary-500);
+  transform: translateY(-1px);
+}
+
+.sm-team-member-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sm-team-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--secondary-100);
+  color: var(--neutral-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sm-team-member-name {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  color: var(--neutral-900);
+  margin: 0;
+}
+
+.sm-team-member-role {
+  font-size: var(--fs-12);
+  color: var(--neutral-500);
+  margin-top: 2px;
+}
+
+.sm-team-member-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sm-badge-approval {
+  background: var(--primary-500);
+  color: var(--white);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+
+.sm-badge-disetujui {
+  background: var(--success-500);
+  color: var(--white);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+
+.sm-badge-belum {
+  background: var(--neutral-500);
+  color: var(--white);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+
+/* ==========================================================================
+   4. Halaman Approval Tim Specific
+   ========================================================================== */
+.sm-approval-card {
+  background: var(--neutral-50);
+  border: 1px solid var(--secondary-100);
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.sm-approval-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.sm-approval-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sm-approval-name {
+  font-size: var(--fs-16);
+  font-weight: var(--fw-semibold);
+  color: var(--neutral-900);
+  margin: 0;
+}
+
+.sm-approval-role-badge {
+  background: var(--primary-50);
+  border: 1px solid var(--primary-200);
+  color: var(--primary-800);
+  font-size: var(--fs-10);
+  font-weight: var(--fw-semibold);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.sm-approval-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-12);
+  color: var(--neutral-500);
+  margin-top: 4px;
+}
+
+.sm-approval-status-pill {
+  display: inline-block;
+  background: var(--primary-50);
+  border: 1px solid var(--primary-200);
+  color: var(--primary-800);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  padding: 3px 10px;
+  border-radius: 999px;
+  margin-top: 8px;
+}
+
+.sm-photo-proof-card {
+  background: var(--primary-50);
+  border: 1px solid var(--secondary-100);
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.sm-photo-proof-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--secondary-100);
+  border: 1px solid var(--secondary-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--warning-700);
+  flex-shrink: 0;
+}
+
+.sm-photo-proof-name {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  color: var(--neutral-900);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sm-photo-proof-sub {
+  font-size: var(--fs-12);
+  color: var(--neutral-500);
+}
+
+.sm-photo-proof-link {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  color: var(--primary-600);
+  margin-top: 2px;
+  display: block;
+}
+
+.sm-btn-reject {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1.5px solid var(--error-500);
+  background: var(--white);
+  color: var(--error-500);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.sm-btn-reject:hover {
+  background: var(--error-100);
+}
+
+.sm-btn-approve {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  background: var(--success-500);
+  color: var(--white);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.28);
+  transition: all 0.2s ease;
+}
+
+.sm-btn-approve:hover {
+  background: var(--success-700);
+}
+
+
+/* KPI Saya > Capaian Terbaru (Figma 1234:2704) — warna status:
+   Hijau = Disetujui, Kuning = Menunggu, Merah = Ditolak */
+.sm-recent-heading {
+  margin: 0 0 8px;
+  color: var(--neutral-800);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28px;
+  letter-spacing: -0.1px;
+}
+
+.sm-recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--secondary-200);
+  border-radius: 12px;
+  background: var(--secondary-50);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.sm-recent-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px;
+  border: 2px solid var(--secondary-200);
+  border-radius: 12px;
+  background: #faece1;
+  color: inherit;
+  text-decoration: none;
+}
+
+.sm-recent-item:hover {
+  border-color: var(--secondary-300);
+}
+
+.sm-recent-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sm-recent-title {
+  margin: 0;
+  color: var(--neutral-900);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  line-height: 20px;
+}
+
+.sm-recent-sub {
+  color: var(--neutral-500);
+  font-size: var(--fs-12);
+  line-height: 16px;
+}
+
+.sm-recent-badge {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: var(--neutral-400);
+  color: var(--white, #fff);
+  font-size: 11px;
+  font-weight: var(--fw-semibold);
+  line-height: 14px;
+  letter-spacing: 0.33px;
+}
+
+.sm-recent-badge.badge-green { background: var(--success-500); }
+.sm-recent-badge.badge-amber { background: var(--warning-500); }
+.sm-recent-badge.badge-red { background: var(--error-500); }
+
+/* KPI Tim > Urutkan (Figma 1234:2841) — tombol + menu pilihan urutan */
+.sm-sort {
+  position: relative;
+}
+
+.sm-sort-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 28px;
+  padding: 4px 10px;
+  border: 1px solid var(--secondary-200);
+  border-radius: 999px;
+  background: var(--white, #fff);
+  color: var(--neutral-500);
+  font: inherit;
+  font-size: 11px;
+  font-weight: var(--fw-semibold);
+  line-height: 14px;
+  letter-spacing: 0.33px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.sm-sort-current {
+  color: var(--primary-700);
+}
+
+.sm-sort-trigger:hover,
+.sm-sort.is-open .sm-sort-trigger {
+  border-color: var(--primary-500);
+  background: var(--primary-50);
+}
+
+.sm-sort-trigger:focus-visible {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
+}
+
+.sm-sort-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 50;
+  width: 252px;
+  padding: 6px;
+  border: 1px solid var(--secondary-200);
+  border-radius: 14px;
+  background: var(--white, #fff);
+  box-shadow: 0 10px 24px rgba(43, 24, 16, 0.12);
+}
+
+.sm-sort-menu[hidden] {
+  display: none;
+}
+
+.sm-sort-menu-title {
+  margin: 0;
+  padding: 6px 10px 6px;
+  color: var(--neutral-500);
+  font-size: 11px;
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.55px;
+  text-transform: uppercase;
+}
+
+.sm-sort-menu ul {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  outline: none;
+}
+
+.sm-sort-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  outline: none;
+}
+
+.sm-sort-option:hover,
+.sm-sort-option:focus-visible {
+  background: var(--secondary-50);
+}
+
+.sm-sort-option:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--primary-500);
+}
+
+.sm-sort-option[aria-selected="true"] {
+  background: var(--primary-50);
+}
+
+.sm-sort-option-icon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--secondary-200);
+  border-radius: 10px;
+  background: var(--secondary-50);
+  color: var(--secondary-500);
+}
+
+.sm-sort-option[aria-selected="true"] .sm-sort-option-icon {
+  border-color: var(--primary-500);
+  background: var(--white, #fff);
+  color: var(--primary-500);
+}
+
+.sm-sort-option-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sm-sort-option-text strong {
+  color: var(--neutral-900);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  line-height: 20px;
+}
+
+.sm-sort-option-text small {
+  color: var(--neutral-500);
+  font-size: var(--fs-12);
+  line-height: 16px;
+}
+
+.sm-sort-option-check {
+  flex-shrink: 0;
+  color: var(--primary-500);
+  visibility: hidden;
+}
+
+.sm-sort-option[aria-selected="true"] .sm-sort-option-check {
+  visibility: visible;
+}
+
+/* Isi Capaian > footer Langkah 5 (Figma 1234:1573): Kembali di samping Kirim Semua */
+.sm-final-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--neutral-300);
+}
+
+.sm-final-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sm-final-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 93px;
+  min-height: 48px;
+  border: 1px solid var(--neutral-300);
+  border-radius: 12px;
+  background: var(--white, #fff);
+  color: var(--neutral-800);
+  font-size: var(--fs-14);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.sm-final-submit {
+  flex: 1;
+  min-height: 48px;
+  padding: 14px 20px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--primary-500);
+  box-shadow: 0 8px 9px rgba(249, 115, 22, 0.15);
+  color: var(--white, #fff);
+  font: inherit;
+  font-size: var(--fs-14);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.sm-final-draft {
+  align-self: center;
+  padding: 5px 0 2px;
+  border: 0;
+  background: none;
+  color: var(--neutral-500);
+  font: inherit;
+  font-size: 11px;
+  line-height: 16.5px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   Halaman Approval Tim Store Manager (Figma 1068:1654)
+   ========================================================================== */
+.sm-approval-page {
+  background: var(--neutral-50);
+}
+
+.sm-ap-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 64px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--neutral-300);
+  background: rgba(250, 250, 249, 0.85);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.sm-ap-back {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--neutral-300);
+  border-radius: 12px;
+  background: var(--neutral-100);
+  color: var(--neutral-800);
+}
+
+.sm-ap-titles {
+  min-width: 0;
+}
+
+.sm-ap-titles h1 {
+  margin: 0;
+  color: var(--neutral-800);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 24px;
+  letter-spacing: -0.425px;
+}
+
+.sm-ap-titles p {
+  margin: 0;
+  overflow: hidden;
+  color: var(--neutral-500);
+  font-size: var(--fs-12);
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sm-approval-page .sm-ap-main {
+  padding: 0;
+  background: transparent;
+}
+
+.sm-ap-flash {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 16px 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+}
+
+.sm-ap-flash.is-success {
+  border: 1px solid var(--success-500);
+  background: var(--success-100);
+  color: var(--success-700);
+}
+
+.sm-ap-flash.is-error {
+  border: 1px solid var(--error-500);
+  background: var(--error-100);
+  color: var(--error-700);
+}
+
+/* Filter kategori */
+.sm-ap-filters {
+  display: flex;
+  gap: 8px;
+  padding: 8px 16px 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.sm-ap-filters::-webkit-scrollbar {
+  display: none;
+}
+
+.sm-ap-chip {
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 0 13px;
+  border: 1px solid var(--secondary-200);
+  border-radius: 9999px;
+  background: var(--white, #fff);
+  color: var(--neutral-800);
+  font: inherit;
+  font-size: var(--fs-12);
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0.12px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.sm-ap-chip.is-active {
+  border-color: var(--primary-500);
+  background: var(--primary-500);
+  color: var(--white, #fff);
+}
+
+.sm-ap-chip:focus-visible,
+.sm-ap-card-head:focus-visible,
+.sm-ap-photo:focus-visible {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
+}
+
+/* Daftar kartu */
+.sm-ap-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+.sm-ap-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 24px 16px;
+  border: 1px dashed var(--secondary-300);
+  border-radius: 12px;
+  color: var(--neutral-500);
+  font-size: var(--fs-14);
+  text-align: center;
+}
+
+.sm-ap-empty[hidden] {
+  display: none;
+}
+
+.sm-ap-empty strong {
+  color: var(--neutral-900);
+  font-size: var(--fs-16);
+}
+
+.sm-ap-card {
+  padding: 16px;
+  border: 1px solid var(--secondary-500);
+  border-radius: 12px;
+  background: var(--secondary-50);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.sm-ap-card.is-open {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+.sm-ap-card[hidden] {
+  display: none;
+}
+
+.sm-ap-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sm-ap-name-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.sm-ap-name {
+  color: var(--neutral-800);
+  font-size: var(--fs-16);
+  font-weight: var(--fw-semibold);
+  line-height: 22px;
+}
+
+.sm-ap-role {
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: var(--secondary-100);
+  color: var(--secondary-500);
+  font-size: 11px;
+  font-weight: var(--fw-semibold);
+  line-height: 14px;
+  letter-spacing: 0.33px;
+}
+
+.sm-ap-chevron {
+  flex-shrink: 0;
+  color: var(--neutral-800);
+  transition: transform 0.18s ease;
+}
+
+.sm-ap-card.is-open .sm-ap-chevron {
+  transform: rotate(180deg);
+}
+
+.sm-ap-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding-top: 8px;
+}
+
+.sm-ap-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--neutral-500);
+  font-size: var(--fs-12);
+  line-height: 16px;
+}
+
+.sm-ap-status {
+  padding: 5px 9px;
+  border: 1px solid var(--secondary-300);
+  border-radius: 12px;
+  background: var(--secondary-100);
+  color: var(--secondary-500);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 14px;
+  letter-spacing: 0.44px;
+}
+
+.sm-ap-body[hidden] {
+  display: none;
+}
+
+/* Foto bukti */
+.sm-ap-photo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px;
+  border: 1px solid var(--neutral-300);
+  border-radius: 8px;
+  background: var(--secondary-100);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sm-ap-photo-thumb {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  background: var(--secondary-200);
+  color: var(--neutral-800);
+}
+
+.sm-ap-photo-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.sm-ap-photo-text strong {
+  overflow: hidden;
+  color: var(--neutral-800);
+  font-size: var(--fs-12);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sm-ap-photo-text small {
+  color: var(--neutral-400);
+  font-size: 11px;
+}
+
+.sm-ap-photo-text em {
+  color: var(--warning-500);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.sm-ap-photo-empty {
+  margin: 0;
+  padding: 24px 12px;
+  border-radius: 12px;
+  background: var(--neutral-100);
+  color: var(--neutral-500);
+  font-size: var(--fs-14);
+  text-align: center;
+}
+
+/* Rincian ceklis */
+.sm-ap-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 8px;
+  padding: 16px;
+  border: 1px solid var(--neutral-300);
+  border-radius: 12px;
+  background: var(--secondary-100);
+}
+
+.sm-ap-cat-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sm-ap-cat-head span {
+  color: var(--neutral-800);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  line-height: 16px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.sm-ap-cat-head small {
+  flex-shrink: 0;
+  color: var(--secondary-500);
+  font-size: 11px;
+  font-weight: var(--fw-semibold);
+  line-height: 14px;
+  letter-spacing: 0.33px;
+}
+
+.sm-ap-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: -8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sm-ap-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 12px;
+  background: var(--neutral-50);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+  color: var(--neutral-800);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  line-height: 16px;
+  letter-spacing: 0.24px;
+}
+
+.sm-ap-check {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 1.5px solid var(--primary-700);
+  border-radius: 8px;
+}
+
+.sm-ap-check.is-checked {
+  border-color: var(--primary-700);
+  background: var(--primary-700);
+  color: var(--white, #fff);
+}
+
+.sm-ap-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 12px;
+  background: var(--neutral-50);
+  color: var(--neutral-800);
+  cursor: text;
+}
+
+.sm-ap-note > svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.sm-ap-note-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sm-ap-note-text strong {
+  font-size: 11px;
+  font-weight: var(--fw-semibold);
+  line-height: 14px;
+  letter-spacing: 0.33px;
+  text-transform: uppercase;
+}
+
+.sm-ap-note textarea {
+  width: 100%;
+  margin-top: 1px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--neutral-800);
+  font: inherit;
+  font-size: var(--fs-12);
+  line-height: 16.5px;
+  resize: vertical;
+}
+
+.sm-ap-note textarea::placeholder {
+  color: var(--neutral-800);
+}
+
+.sm-ap-note:focus-within {
+  box-shadow: inset 0 0 0 2px var(--primary-500);
+}
+
+.sm-ap-note textarea:focus {
+  outline: none;
+}
+
+/* Tombol aksi */
+.sm-ap-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 12px;
+}
+
+.sm-ap-card.is-open .sm-ap-actions {
+  padding-top: 16px;
+}
+
+.sm-ap-btn-reject,
+.sm-ap-btn-approve {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 44px;
+  padding: 0 18px;
+  border: 2px solid;
+  border-radius: 12px;
+  font: inherit;
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  line-height: 20px;
+  letter-spacing: 0.14px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.sm-ap-btn-reject {
+  border-color: var(--error-500);
+  background: var(--white, #fff);
+  color: var(--error-500);
+}
+
+.sm-ap-btn-approve {
+  min-width: 162px;
+  border-color: var(--success-500);
+  background: var(--success-500);
+  color: var(--white, #fff);
+}
+
+.sm-ap-btn-reject:focus-visible,
+.sm-ap-btn-approve:focus-visible,
+.sm-ap-btn-bulk:focus-visible {
+  outline: 2px solid var(--neutral-800);
+  outline-offset: 2px;
+}
+
+/* Persetujuan sekaligus */
+.sm-ap-bulk {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 16px 24px;
+  padding: 13px;
+  border: 1px solid var(--neutral-200);
+  border-radius: 12px;
+  background: var(--neutral-100);
+  text-align: center;
+}
+
+.sm-ap-bulk h2 {
+  margin: 0;
+  color: var(--neutral-800);
+  font-size: var(--fs-12);
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0.12px;
+}
+
+.sm-ap-bulk p {
+  max-width: 320px;
+  margin: 0;
+  color: var(--neutral-500);
+  font-size: var(--fs-12);
+  line-height: 16px;
+}
+
+.sm-ap-bulk form {
+  width: 100%;
+}
+
+.sm-ap-btn-bulk {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  min-height: 44px;
+  padding: 13px;
+  border: 1px solid var(--success-500);
+  border-radius: 12px;
+  background: var(--success-500);
+  color: var(--white, #fff);
+  font: inherit;
+  font-size: var(--fs-12);
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0.12px;
+  cursor: pointer;
+}
