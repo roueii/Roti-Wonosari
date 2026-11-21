@@ -1,0 +1,31 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+
+class Position extends Model
+{
+    use HasFactory;
+
+    protected $table = 'positions';
+    
+    protected $fillable = [
+        'name',
+        'description',
+    ];
+
+    public function users()
+    {
+        return $this->hasMany(User::class, 'position_id', 'id');
+    }
+
+    public function positionKpis()
+    {
+        return $this->hasMany(PositionKpi::class, 'position_id', 'id');
+    }
+}
