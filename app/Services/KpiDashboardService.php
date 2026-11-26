@@ -17,17 +17,29 @@ class KpiDashboardService
      */
     public static function myKpis(): ?array
     {
-        $json = BackendApiService::fetch('my-kpis');
-        $items = $json['data'] ?? null;
+        // Utama: GET /api/dashboard/me (ringkasan resmi Backend, sudah dikelompokkan); cadangan: GET /api/my-kpis
+        $rows = [];
+        $me = BackendApiService::fetch('dashboard/me')['data']['groups'] ?? null;
+        if (is_array($me)) {
+            foreach ($me as $g) {
+                foreach ($g['indicators'] ?? [] as $ind) {
+                    $rows[] = ['category' => $g['label'] ?? 'Lainnya', 'status' => $ind['status'] ?? null];
+                }
+            }
+        } else {
+            foreach (BackendApiService::fetch('my-kpis')['data'] ?? [] as $pk) {
+                $rows[] = ['category' => $pk['indicator']['category']['name'] ?? 'Lainnya', 'status' => $pk['submission']['status'] ?? null];
+            }
+        }
 
-        if (! is_array($items) || count($items) === 0) {
+        if (! $rows) {
             return null;
         }
 
         $groups = [];
-        foreach ($items as $pk) {
-            $category = $pk['indicator']['category']['name'] ?? 'Lainnya';
-            $status = $pk['submission']['status'] ?? null;
+        foreach ($rows as $row) {
+            $category = $row['category'];
+            $status = $row['status'];
 
             $groups[$category] ??= ['name' => $category, 'completed' => 0, 'total' => 0, 'rejected' => 0];
             $groups[$category]['total']++;

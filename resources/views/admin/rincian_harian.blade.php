@@ -16,7 +16,7 @@
 
 @php
     $statusLabel = ['disetujui' => 'Disetujui', 'menunggu' => 'Menunggu', 'ditolak' => 'Ditolak', 'kosong' => 'Kosong'];
-    $fotoLabel = ['sah' => 'Foto: Sah', 'belum' => 'Foto: Belum diperiksa', 'tidak_sah' => 'Foto: Tidak sah'];
+    $fotoLabel = ['sah' => 'Foto: Sah', 'belum' => 'Foto: Belum diperiksa', 'tidak_sah' => 'Foto: Tidak sah', '' => 'Tanpa foto'];
 @endphp
 
 <body class="rekap-page">
@@ -29,7 +29,7 @@
             </a>
             <div class="rekap-header-text">
                 <h1 class="rekap-title">Rincian Harian</h1>
-                <p class="rekap-subtitle">{{ $date->locale('id')->translatedFormat('j F Y') }}</p>
+                <p class="rekap-subtitle">{{ $rincian['label'] }} &middot; {{ $date->locale('id')->translatedFormat('j F Y') }}</p>
             </div>
         </header>
 
@@ -43,7 +43,7 @@
                 @endif
                 <span class="rekap-step-date">
                     <x-icon name="calendar" width="16" height="16" />
-                    {{ $date->locale('id')->translatedFormat('l, j F Y') }}
+                    {{ $rincian['date_label'] }}
                 </span>
                 @if ($nextDate)
                     <a class="rekap-step-btn" href="{{ route('admin.rekap.rincian', ['bagian' => $bagian, 'tanggal' => $nextDate->format('Y-m-d')]) }}" aria-label="Tanggal berikutnya"><x-icon name="nav-arrow-right" width="18" height="18" /></a>
@@ -52,11 +52,82 @@
                 @endif
             </div>
 
-            <section class="rekap-card" aria-label="Data belum tersedia">
-                <div class="rekap-title-group">
-                    <h2 class="rekap-section-title">Data belum tersedia</h2>
-                    <p class="rekap-section-sub">Rincian harian ini akan tampil setelah Backend menyediakan data rekap. Angka contoh tidak ditampilkan agar tidak menyesatkan.</p>
+            <div class="rekap-tiles">
+                <div class="rekap-tile is-card"><strong>{{ $rincian['mengisi'] }}</strong><span>Mengisi</span></div>
+                <div class="rekap-tile is-card"><strong>{{ $rincian['susulan'] }}</strong><span>Susulan</span></div>
+                <div class="rekap-tile is-card"><strong>{{ $rincian['kosong'] }}</strong><span>Kosong</span></div>
+            </div>
+
+            <!-- Isian Karyawan -->
+            <section class="rekap-card" aria-labelledby="h-isian">
+                <div class="rekap-section-header">
+                    <div class="rekap-title-group">
+                        <h2 class="rekap-section-title" id="h-isian">Isian Karyawan</h2>
+                        <p class="rekap-section-sub">{{ count($rincian['cards']) }} karyawan di bagian ini</p>
+                    </div>
+                    <span class="rekap-chip rekap-chip--brand">{{ $rincian['chip'] }}</span>
                 </div>
+
+                <div class="rekap-list" id="isianKaryawan">
+                    @foreach ($rincian['cards'] as $i => $card)
+                        @php $e = $card['entry']; @endphp
+                        @if ($e['status'] === 'kosong')
+                            <article class="rekap-emp is-kosong {{ $i >= 5 ? 'is-extra' : '' }}" @if ($i >= 5) hidden @endif>
+                                <div class="rekap-emp-head">
+                                    <div class="rekap-emp-who">
+                                        <span class="rekap-avatar is-small is-muted">{{ $card['emp']['initials'] }}</span>
+                                        <strong class="rekap-emp-name is-muted">{{ $card['emp']['name'] }}</strong>
+                                    </div>
+                                    <span class="rekap-chip rekap-chip--kosong">Kosong</span>
+                                </div>
+                                <p class="rekap-footnote">{{ $card['note'] }}</p>
+                            </article>
+                        @else
+                            <article class="rekap-emp {{ $i >= 5 ? 'is-extra' : '' }}" @if ($i >= 5) hidden @endif>
+                                <div class="rekap-emp-head">
+                                    <div class="rekap-emp-who">
+                                        <span class="rekap-avatar is-small">{{ $card['emp']['initials'] }}</span>
+                                        <div>
+                                            <strong class="rekap-emp-name">{{ $card['emp']['name'] }}</strong>
+                                            <span class="rekap-foto is-{{ $e['foto'] ?? 'kosong' }} is-small">{{ $fotoLabel[$e['foto'] ?? ''] }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="rekap-pills">
+                                        <span class="rekap-chip rekap-chip--{{ $e['status'] }}">{{ $statusLabel[$e['status']] }}</span>
+                                        @if ($e['susulan'])
+                                            <span class="rekap-chip rekap-chip--brand">Susulan</span>
+                                        @endif
+                                    </div>
+                                </div>
+                                <hr class="rekap-divider" />
+                                <dl class="rekap-emp-rows">
+                                    @foreach ($card['rows'] as $row)
+                                        <div>
+                                            <dt>{{ $row['name'] }}</dt>
+                                            <dd>
+                                                @if ($row['tercapai'])
+                                                    <span class="rekap-tercapai"><x-icon name="check-circle" width="13" height="13" />Tercapai</span>
+                                                @endif
+                                                {{ $row['value'] }}
+                                            </dd>
+                                        </div>
+                                    @endforeach
+                                </dl>
+                                @if ($card['note'])
+                                    <p class="rekap-footnote {{ ($card['note_tone'] ?? null) === 'error' ? 'is-error' : '' }}">{{ $card['note'] }}</p>
+                                @endif
+                            </article>
+                        @endif
+                    @endforeach
+                </div>
+
+                @if (count($rincian['cards']) > 5)
+                    <button type="button" class="rekap-link-btn" data-toggle-extra="isianKaryawan"
+                        data-more="Lihat {{ count($rincian['cards']) - 5 }} karyawan lain" data-less="Tampilkan lebih sedikit" aria-expanded="false">
+                        <span>Lihat {{ count($rincian['cards']) - 5 }} karyawan lain</span>
+                        <x-icon name="nav-arrow-right" width="16" height="16" />
+                    </button>
+                @endif
             </section>
 
             <aside class="rekap-card rekap-info">

@@ -76,9 +76,28 @@ class AdminController extends Controller
         $bagian = RekapBulananService::resolveBagian($request->query('bagian'));
         $bagianOptions = RekapBulananService::bagianOptions();
 
+        // Dihitung dari data asli Backend (admin/users + admin/kpi-submissions), lihat RekapBulananService
+        $employeeOptions = RekapBulananService::employees();
+        $unavailable = $employeeOptions === null;
+        $employeeOptions ??= [];
+        $employee = collect($employeeOptions)->firstWhere('id', $request->integer('karyawan')) ?? ($employeeOptions[0] ?? null);
+        if ($employee) {
+            $employee['inactive_since'] = $employee['inactive'];
+        }
 
-        // Backend belum menyediakan endpoint rekap bulanan: halaman menampilkan "Data belum tersedia".
-        return view('admin.rekap', compact('user', 'mode', 'month', 'months', 'bagian', 'bagianOptions'));
+        $rekap = match (true) {
+            $unavailable => null,
+            $mode === 'karyawan' => $employee ? RekapBulananService::perKaryawan($employee, $month) : null,
+            default => RekapBulananService::perBagian($bagian, $month),
+        };
+
+        $date = RekapBulananService::resolveDate($request->query('tanggal'), RekapBulananService::defaultDate($month));
+        $prevDate = RekapBulananService::stepDate($date, -1);
+        $nextDate = RekapBulananService::stepDate($date, 1);
+
+        return view('admin.rekap', compact(
+            'user', 'mode', 'month', 'months', 'bagian', 'bagianOptions', 'employeeOptions', 'employee', 'rekap', 'unavailable', 'date', 'prevDate', 'nextDate'
+        ));
     }
 
     /**
@@ -92,8 +111,9 @@ class AdminController extends Controller
         $prevDate = RekapBulananService::stepDate($date, -1);
         $nextDate = RekapBulananService::stepDate($date, 1);
 
-        // Backend belum menyediakan endpoint rincian harian: halaman menampilkan "Data belum tersedia".
-        return view('admin.rincian_harian', compact('user', 'bagian', 'date', 'prevDate', 'nextDate'));
+        $rincian = RekapBulananService::rincianHarian($bagian, $date);
+
+        return view('admin.rincian_harian', compact('user', 'bagian', 'date', 'prevDate', 'nextDate', 'rincian'));
     }
 
     /**
@@ -200,6 +220,10 @@ class AdminController extends Controller
                         'ok' => $s['answer_yes_no'] === true,
                         'evidences' => (int) ($s['evidences_count'] ?? 0),
                     ])->values()->all(),
+                    // Foto bukti: detail per capaian (GET /api/admin/kpi-submissions/{id}), hanya yang punya foto
+                    'photos' => $items->filter(fn ($s) => ($s['evidences_count'] ?? 0) > 0)
+                        ->flatMap(fn ($s) => BackendApiService::fetch("admin/kpi-submissions/{$s['id']}")['data']['evidences'] ?? [])
+                        ->values()->all(),
                 ];
             })
             ->reject(fn ($r) => in_array($r['key'], $done, true))
@@ -416,73 +440,27 @@ class AdminController extends Controller
     }
 
     /**
-     * Kelola KPI: indikator aktif per jabatan dari Backend (GET /api/positions/{id}/kpis).
+     * Reset kata sandi akun (PUT /api/admin/users/{id}/password). Semua sesi akun itu dikeluarkan Backend.
      */
-    public function kelolaKpi()
+    public function resetKataSandi(Request $request, int $id)
     {
-        $user = $this->currentUser();
-        [$divisions, $kpiGroups] = $this->liveKpiGroups() ?? [[], []];
-        $activeDivision = $divisions[0] ?? null;
+        $data = $request->validate(['password' => ['required', 'string', 'min:8']], [
+            'password.min' => 'Kata sandi baru minimal 8 karakter.',
+        ]);
+        $res = BackendApiService::send('PUT', "admin/users/{$id}/password", $data);
 
-        return view('admin.kpi', compact('user', 'divisions', 'activeDivision', 'kpiGroups'));
+        return $this->backendResult($res, 'Kata sandi berhasil diganti. Akun tersebut perlu login ulang.');
     }
 
     /**
-     * @return array{0: array<int,string>, 1: array<string,array>}|null
+     * Hapus akun (DELETE /api/admin/users/{id}). Backend menolak akun sendiri, admin terakhir,
+     * dan akun yang sudah punya riwayat capaian (cukup dinonaktifkan).
      */
-    private function liveKpiGroups(): ?array
+    public function hapusAkun(int $id)
     {
-        $positions = BackendApiService::fetch('admin/positions');
-        if (! $positions) {
-            return null;
-        }
+        $res = BackendApiService::send('DELETE', "admin/users/{$id}");
 
-        $freq = ['DAILY' => 'Harian', 'WEEKLY' => 'Mingguan', 'MONTHLY' => 'Bulanan'];
-        $fmt = fn ($n) => str_ends_with($s = number_format((float) $n, 2, ',', '.'), ',00') ? substr($s, 0, -3) : $s;
-
-        $divisions = [];
-        $kpiGroups = [];
-        foreach ($positions['data'] ?? [] as $pos) {
-            $label = $this->divisionMeta($pos['name'])[0];
-            $items = BackendApiService::fetch("positions/{$pos['id']}/kpis")['data'] ?? null;
-            if ($items === null) {
-                continue;
-            }
-
-            $groups = [];
-            foreach ($items as $pk) {
-                $ind = $pk['indicator'] ?? [];
-                $cat = $ind['category']['name'] ?? 'Lainnya';
-                $isYesNo = ($pk['input_type'] ?? '') === 'YES_NO';
-                $unit = $ind['unit'] ?? '';
-
-                $groups[$cat] ??= [
-                    'id' => \Illuminate\Support\Str::slug($cat),
-                    'title' => $cat,
-                    'count_text' => null,
-                    'expanded' => true,
-                    'items' => [],
-                ];
-                $groups[$cat]['items'][] = [
-                    'id' => $pk['id'],
-                    'name' => $ind['name'] ?? '-',
-                    'subtitle' => ($isYesNo ? 'Target: Ya' : (($pk['calculation_type'] ?? '') === 'LOWER_IS_BETTER' ? 'Maksimal ' : 'Target: ') . $fmt($pk['target']) . ' ' . $unit)
-                        . ' · Bobot ' . $fmt($pk['weight']) . '% · ' . ($freq[$pk['frequency']] ?? $pk['frequency']),
-                    'badge' => $isYesNo ? 'Ceklis' : 'Angka · ' . $unit,
-                    'type' => $isYesNo ? 'checklist' : 'number',
-                ];
-            }
-
-            foreach ($groups as &$g) {
-                $g['count_text'] = count($g['items']) . ' indikator';
-            }
-            unset($g);
-
-            $divisions[] = $label;
-            $kpiGroups[$label] = array_values($groups);
-        }
-
-        return $divisions ? [$divisions, $kpiGroups] : null;
+        return $this->backendResult($res, 'Akun berhasil dihapus.');
     }
 
     /**

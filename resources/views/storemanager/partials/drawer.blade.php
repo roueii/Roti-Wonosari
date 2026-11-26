@@ -2,7 +2,7 @@
 @php
     $smNav = [
         ['route' => 'storemanager.dashboard', 'label' => 'Beranda', 'icon' => 'home-alt-slim-horiz', 'size' => 16, 'active' => request()->routeIs('storemanager.dashboard')],
-        ['route' => 'storemanager.penjualan', 'label' => 'Input Capaian', 'icon' => 'page-edit', 'size' => 16, 'active' => request()->is('*isi-capaian*') || request()->routeIs('storemanager.training')],
+        ['route' => 'storemanager.kpi', 'label' => 'Input Capaian', 'icon' => 'page-edit', 'size' => 16, 'active' => request()->is('*isi-capaian*') || request()->routeIs('storemanager.training')],
         ['route' => 'storemanager.approval', 'label' => 'Approval Tim', 'icon' => 'community', 'size' => 20, 'active' => request()->routeIs('storemanager.approval*')],
         ['route' => 'storemanager.riwayat', 'label' => 'Riwayat', 'icon' => 'clock-rotate-right', 'size' => 16, 'active' => request()->routeIs('storemanager.riwayat*')],
         ['route' => 'storemanager.profile', 'label' => 'Profil', 'icon' => 'profile-circle', 'size' => 16, 'active' => request()->routeIs('storemanager.profile*')],

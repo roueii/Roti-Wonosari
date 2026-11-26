@@ -8,6 +8,7 @@ use App\Http\Controllers\ProduksiController;
 use App\Http\Controllers\SalesMarketingController;
 use App\Http\Controllers\StoreManagerController;
 use App\Http\Controllers\SupervisorController;
+use App\Http\Controllers\KpiFormController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,15 +29,13 @@ Route::controller(AuthController::class)->group(function () {
 });
 
 /**
- * Daftarkan langkah-langkah form isi capaian sebuah role.
- * $steps: [slug-url => [nama route, method tampil, method simpan]]
+ * Form Isi Capaian sebuah role: dibuat otomatis dari indikator jabatan di Backend (KpiFormController).
+ * URL: {prefix}/isi-capaian/{langkah?}; nama route: {name}.kpi, {name}.kpi.post, {name}.kpi.draft
  */
-$registerSteps = function (string $prefix, string $name, array $steps): void {
-    foreach ($steps as $slug => [$routeName, $show, $save]) {
-        Route::get("{$prefix}/isi-capaian/{$slug}", $show)->name("{$name}.{$routeName}");
-        Route::post("{$prefix}/isi-capaian/{$slug}", $save)->name("{$name}.{$routeName}.post");
-    }
-    Route::post("{$prefix}/isi-capaian/draft", 'simpanDraft')->name("{$name}.draft.post");
+$registerKpiForm = function (string $prefix, string $name): void {
+    Route::get("{$prefix}/isi-capaian/{step?}", [KpiFormController::class, 'step'])->name("{$name}.kpi");
+    Route::post("{$prefix}/isi-capaian/{step}", [KpiFormController::class, 'save'])->name("{$name}.kpi.post");
+    Route::post("{$prefix}/isi-capaian-draf", [KpiFormController::class, 'draft'])->name("{$name}.kpi.draft");
 };
 
 /** Daftarkan halaman riwayat, detail riwayat, dan profil sebuah role. */
@@ -54,7 +53,6 @@ Route::prefix('admin')->name('admin.')->middleware('masuk:admin')->controller(Ad
     Route::get('/', 'dashboard')->name('dashboard');
     Route::get('/tinjau-revisi', 'revisi')->name('revisi');
     Route::post('/tinjau-revisi/tindak-lanjut', 'tindakLanjutRevisi')->name('revisi.tindak_lanjut');
-    Route::get('/kelola-kpi', 'kelolaKpi')->name('kpi');
     Route::get('/approve-laporan', 'approveLaporan')->name('approve');
     Route::post('/approve-laporan/{userId}/{date}', 'putuskanLaporan')->whereNumber('userId')->where('date', '\d{4}-\d{2}-\d{2}')->name('approve.decide');
     Route::get('/profil', 'profile')->name('profile');
@@ -66,21 +64,30 @@ Route::prefix('admin')->name('admin.')->middleware('masuk:admin')->controller(Ad
     Route::post('/kelola-akun', 'simpanAkun')->name('accounts.store');
     Route::post('/kelola-akun/{id}', 'ubahAkun')->whereNumber('id')->name('accounts.update');
     Route::post('/kelola-akun/{id}/status', 'ubahStatusAkun')->whereNumber('id')->name('accounts.status');
+    Route::post('/kelola-akun/{id}/kata-sandi', 'resetKataSandi')->whereNumber('id')->name('accounts.password');
+    Route::post('/kelola-akun/{id}/hapus', 'hapusAkun')->whereNumber('id')->name('accounts.destroy');
+});
+
+// Ganti kata sandi sendiri dari halaman Profil (semua role yang sudah login)
+Route::post('/profil/kata-sandi', [\App\Http\Controllers\KataSandiController::class, 'ganti'])->middleware('masuk')->name('profil.kata-sandi');
+
+// Kelola KPI Admin (tersambung ke katalog indikator & indikator per jabatan di Backend)
+Route::prefix('admin/kelola-kpi')->name('admin.kpi')->middleware('masuk:admin')->controller(\App\Http\Controllers\KelolaKpiController::class)->group(function () {
+    Route::get('/', 'index');
+    Route::post('/', 'store')->name('.store');
+    Route::post('/{indicator}', 'update')->whereNumber('indicator')->name('.update');
+    Route::post('/{indicator}/nonaktifkan', 'nonaktifkan')->whereNumber('indicator')->name('.deactivate');
+    Route::post('/{indicator}/aktifkan', 'aktifkan')->whereNumber('indicator')->name('.activate');
+    Route::post('/{indicator}/hapus', 'hapus')->whereNumber('indicator')->name('.destroy');
 });
 
 // =========================================================================
 // STORE MANAGER
 // =========================================================================
-Route::middleware('masuk:store_manager')->controller(StoreManagerController::class)->group(function () use ($registerSteps, $registerCommon) {
+Route::middleware('masuk:store_manager')->controller(StoreManagerController::class)->group(function () use ($registerKpiForm, $registerCommon) {
     Route::get('/store-manager', 'dashboard')->name('storemanager.dashboard');
 
-    $registerSteps('/store-manager', 'storemanager', [
-        'penjualan' => ['penjualan', 'isiPenjualan', 'simpanPenjualan'],
-        'laba-persediaan' => ['laba_persediaan', 'isiLabaPersediaan', 'simpanLabaPersediaan'],
-        'pelayanan' => ['pelayanan', 'isiPelayanan', 'simpanPelayanan'],
-        'operasional-sdm' => ['operasional_sdm', 'isiOperasionalSdm', 'simpanOperasionalSdm'],
-        'promosi-event' => ['promosi_event', 'isiPromosiEvent', 'simpanPromosiEvent'],
-    ]);
+    $registerKpiForm('/store-manager', 'storemanager');
 
     Route::get('/store-manager/training', 'training')->name('storemanager.training');
     Route::post('/store-manager/training', 'simpanTraining')->name('storemanager.training.post');
@@ -96,18 +103,11 @@ Route::middleware('masuk:store_manager')->controller(StoreManagerController::cla
 // =========================================================================
 // FRONTLINER (URL /karyawan)
 // =========================================================================
-Route::middleware('masuk:frontliner')->controller(FrontlinerController::class)->group(function () use ($registerSteps, $registerCommon) {
+Route::middleware('masuk:frontliner')->controller(FrontlinerController::class)->group(function () use ($registerKpiForm, $registerCommon) {
     Route::get('/karyawan', 'dashboard')->name('staff.dashboard');
     Route::get('/frontliner', 'dashboard')->name('frontliner.dashboard');
 
-    $registerSteps('/karyawan', 'frontliner', [
-        'penjualan' => ['penjualan', 'isiPenjualan', 'simpanPenjualan'],
-        'pelayanan' => ['pelayanan', 'isiPelayanan', 'simpanPelayanan'],
-        'product-knowledge' => ['knowledge', 'isiProductKnowledge', 'simpanProductKnowledge'],
-        'akurasi-kasir' => ['kasir', 'isiAkurasiKasir', 'simpanAkurasiKasir'],
-        'display-kebersihan' => ['display', 'isiDisplayKebersihan', 'simpanDisplayKebersihan'],
-        'kepatuhan-sop' => ['kepatuhan', 'isiKepatuhanSop', 'simpanKepatuhanSop'],
-    ]);
+    $registerKpiForm('/karyawan', 'frontliner');
 
     $registerCommon('/karyawan', 'frontliner');
 });
@@ -115,15 +115,10 @@ Route::middleware('masuk:frontliner')->controller(FrontlinerController::class)->
 // =========================================================================
 // DRIVER
 // =========================================================================
-Route::middleware('masuk:driver')->controller(DriverController::class)->group(function () use ($registerSteps, $registerCommon) {
+Route::middleware('masuk:driver')->controller(DriverController::class)->group(function () use ($registerKpiForm, $registerCommon) {
     Route::get('/driver', 'dashboard')->name('driver.dashboard');
 
-    $registerSteps('/driver', 'driver', [
-        'pengiriman' => ['pengiriman', 'isiPengiriman', 'simpanPengiriman'],
-        'administrasi' => ['administrasi', 'isiAdministrasi', 'simpanAdministrasi'],
-        'kendaraan' => ['kendaraan', 'isiKendaraan', 'simpanKendaraan'],
-        'pelayanan' => ['pelayanan', 'isiPelayanan', 'simpanPelayanan'],
-    ]);
+    $registerKpiForm('/driver', 'driver');
 
     $registerCommon('/driver', 'driver');
 });
@@ -131,16 +126,10 @@ Route::middleware('masuk:driver')->controller(DriverController::class)->group(fu
 // =========================================================================
 // PRODUKSI
 // =========================================================================
-Route::middleware('masuk:produksi')->controller(ProduksiController::class)->group(function () use ($registerSteps, $registerCommon) {
+Route::middleware('masuk:produksi')->controller(ProduksiController::class)->group(function () use ($registerKpiForm, $registerCommon) {
     Route::get('/produksi', 'dashboard')->name('produksi.dashboard');
 
-    $registerSteps('/produksi', 'produksi', [
-        'hasil-produksi' => ['hasil_produksi', 'isiHasilProduksi', 'simpanHasilProduksi'],
-        'waktu-alat' => ['waktu_alat', 'isiWaktuAlat', 'simpanWaktuAlat'],
-        'kehadiran-disiplin' => ['kehadiran_disiplin', 'isiKehadiranDisiplin', 'simpanKehadiranDisiplin'],
-        'kepatuhan-sop' => ['kepatuhan_sop', 'isiKepatuhanSop', 'simpanKepatuhanSop'],
-        'kebersihan-area' => ['kebersihan_area', 'isiKebersihanArea', 'simpanKebersihanArea'],
-    ]);
+    $registerKpiForm('/produksi', 'produksi');
 
     $registerCommon('/produksi', 'produksi');
 });
@@ -154,11 +143,9 @@ foreach ([
     ['sales-marketing', 'sales', SalesMarketingController::class, 'sales_marketing'],
     ['supervisor', 'supervisor', SupervisorController::class, 'supervisor'],
 ] as [$prefix, $name, $controller, $role]) {
+    Route::middleware("masuk:{$role}")->group(fn () => $registerKpiForm("/{$prefix}", $name));
     Route::prefix($prefix)->name("{$name}.")->middleware("masuk:{$role}")->controller($controller)->group(function () {
         Route::get('/', 'dashboard')->name('dashboard');
-        Route::get('/isi-capaian/{step}', 'step')->name('step');
-        Route::post('/isi-capaian/{step}', 'saveStep')->name('step.post');
-        Route::post('/draft', 'draft')->name('draft.post');
         Route::get('/riwayat', 'riwayat')->name('riwayat');
         Route::get('/riwayat/{id}', 'detailRiwayat')->whereNumber('id')->name('riwayat.detail');
         Route::get('/profil', 'profil')->name('profile');
@@ -220,7 +207,7 @@ foreach (['driver', 'produksi'] as $role) {
     }
 }
 
-// Alias langkah form tanpa "/isi-capaian", mis. /driver/pengiriman -> /driver/isi-capaian/pengiriman
+// URL langkah form lama (mis. /driver/pengiriman) -> awal form Isi Capaian
 // Format: [prefix alias, prefix tujuan, [slug alias => slug tujuan]]
 $frontlinerSteps = [
     'penjualan' => 'penjualan', 'pelayanan' => 'pelayanan', 'product-knowledge' => 'product-knowledge',
@@ -243,7 +230,7 @@ $stepAliases = [
 
 foreach ($stepAliases as [$from, $to, $slugs]) {
     foreach ($slugs as $alias => $slug) {
-        $aliases["{$from}/{$alias}"] = "{$to}/isi-capaian/{$slug}";
+        $aliases["{$from}/{$alias}"] = "{$to}/isi-capaian"; // langkah kini mengikuti kelompok Kelola KPI
     }
 }
 

@@ -10,29 +10,6 @@ use App\Services\BackendApiService;
 
 class StoreManagerController extends Controller
 {
-    /**
-     * Item ceklis Store Manager (Figma) -> kode indikator Backend (posisi Store Manager).
-     * CLN_STORE dan HR_TEAM_ATTEND belum punya item di form Figma sehingga tidak dikirim dari sini.
-     */
-    private const BACKEND_MAP = [
-        'target_omset' => 'SAL_TARGET',
-        'pertumbuhan_omset' => 'SAL_GROWTH',
-        'average_basket' => 'SAL_BASKET',
-        'food_cost' => 'FIN_FOODCOST',
-        'waste_expired' => 'FIN_WASTE',
-        'akurasi_stok' => 'INV_ACCURACY',
-        'stock_opname' => 'INV_OPNAME',
-        'kepuasan_pelanggan' => 'SVC_CSAT',
-        'komplain_selesai' => 'SVC_COMPLAINT',
-        'display_lengkap' => 'OPS_DISPLAY',
-        'sop_buka' => 'OPS_SOP',
-        'sop_tutup' => 'OPS_SOP',
-        'briefing_harian' => 'HR_BRIEFING',
-        'training_karyawan' => 'HR_TRAINING',
-        'promo_terjadwal' => 'OPS_PROMO',
-        'promo_dieksekusi' => 'OPS_PROMO',
-    ];
-
     protected array $defaultUser = ['name' => 'User', 'role' => 'store_manager', 'role_label' => 'Store Manager', 'email' => 'User@capaian.id'];
 
     /**
@@ -51,7 +28,7 @@ class StoreManagerController extends Controller
         $todayBadge = 'Hari ini, ' . now()->locale('id')->translatedFormat('j M');
 
         // KPI Saya: semua data dari Backend (my-kpis + riwayat); kosong bila belum ada data
-        $data = KpiDashboardService::forDashboard(route('storemanager.penjualan'), 'storemanager.riwayat.detail');
+        $data = KpiDashboardService::forDashboard(\App\Http\Controllers\KpiFormController::startUrl('store_manager'), 'storemanager.riwayat.detail');
         ['metricsSummary' => $metricsSummary, 'progressRows' => $progressRows, 'dailyTask' => $dailyTask, 'recentAchievements' => $recentAchievements] = $data;
 
         // KPI Tim: diisi dari GET /api/dashboard/team di bawah
@@ -127,248 +104,6 @@ class StoreManagerController extends Controller
         ));
     }
 
-    // =========================================================================
-    // MULTI-STEP PENGISIAN CAPAIAN STORE MANAGER (5 LANGKAH SESUAI FIGMA)
-    // =========================================================================
-
-    /**
-     * Langkah 1 dari 5: Penjualan
-     */
-    public function isiPenjualan()
-    {
-        $user = $this->currentUser();
-
-        $stepInfo = [
-            'current' => 1,
-            'total' => 5,
-            'title' => 'Penjualan',
-            'subtitle' => 'Centang indikator yang tercapai hari ini',
-            'category_name' => 'Penjualan',
-            'next_route' => route('storemanager.laba_persediaan'),
-            'back_route' => route('storemanager.dashboard'),
-        ];
-
-        // Definisi item: config/kpi_form.php (semua ceklis mulai kosong)
-        $indicators = config('kpi_form.store_manager.penjualan');
-
-        return view('storemanager.penjualan', compact('user', 'stepInfo', 'indicators'));
-    }
-
-    /**
-     * Simpan Langkah 1: Penjualan
-     */
-    public function simpanPenjualan(Request $request)
-    {
-        session([
-            'sm_penjualan' => [
-                'indicators' => $request->input('indicators', []),
-                'saved_at' => now()->toDateTimeString(),
-            ]
-        ]);
-
-        return redirect()->route('storemanager.laba_persediaan')->with('status', 'Penjualan berhasil disimpan!');
-    }
-
-    /**
-     * Langkah 2 dari 5: Laba & Persediaan
-     */
-    public function isiLabaPersediaan()
-    {
-        $user = $this->currentUser();
-
-        $stepInfo = [
-            'current' => 2,
-            'total' => 5,
-            'title' => 'Laba & Persediaan',
-            'subtitle' => 'Centang indikator yang tercapai hari ini',
-            'category_name' => 'Laba & Persediaan',
-            'next_route' => route('storemanager.pelayanan'),
-            'back_route' => route('storemanager.penjualan'),
-        ];
-
-        $labaBiayaIndicators = config('kpi_form.store_manager.laba_persediaan.laba_biaya');
-
-        $persediaanIndicators = config('kpi_form.store_manager.laba_persediaan.persediaan');
-
-        return view('storemanager.laba_persediaan', compact('user', 'stepInfo', 'labaBiayaIndicators', 'persediaanIndicators'));
-    }
-
-    /**
-     * Simpan Langkah 2: Laba & Persediaan
-     */
-    public function simpanLabaPersediaan(Request $request)
-    {
-        session([
-            'sm_laba_persediaan' => [
-                'laba' => $request->input('laba', []),
-                'persediaan' => $request->input('persediaan', []),
-                'saved_at' => now()->toDateTimeString(),
-            ]
-        ]);
-
-        return redirect()->route('storemanager.pelayanan')->with('status', 'Laba & Persediaan berhasil disimpan!');
-    }
-
-    /**
-     * Langkah 3 dari 5: Pelayanan
-     */
-    public function isiPelayanan()
-    {
-        $user = $this->currentUser();
-
-        $stepInfo = [
-            'current' => 3,
-            'total' => 5,
-            'title' => 'Pelayanan',
-            'subtitle' => 'Centang indikator yang tercapai hari ini',
-            'category_name' => 'Pelayanan',
-            'next_route' => route('storemanager.operasional_sdm'),
-            'back_route' => route('storemanager.laba_persediaan'),
-        ];
-
-        // Definisi item: config/kpi_form.php (semua ceklis mulai kosong)
-        $indicators = config('kpi_form.store_manager.pelayanan');
-
-        return view('storemanager.pelayanan', compact('user', 'stepInfo', 'indicators'));
-    }
-
-    /**
-     * Simpan Langkah 3: Pelayanan
-     */
-    public function simpanPelayanan(Request $request)
-    {
-        session([
-            'sm_pelayanan' => [
-                'indicators' => $request->input('indicators', []),
-                'saved_at' => now()->toDateTimeString(),
-            ]
-        ]);
-
-        return redirect()->route('storemanager.operasional_sdm')->with('status', 'Pelayanan berhasil disimpan!');
-    }
-
-    /**
-     * Langkah 4 dari 5: Operasional & SDM
-     */
-    public function isiOperasionalSdm()
-    {
-        $user = $this->currentUser();
-
-        $stepInfo = [
-            'current' => 4,
-            'total' => 5,
-            'title' => 'Operasional & SDM',
-            'subtitle' => 'Centang indikator yang tercapai hari ini',
-            'category_name' => 'Operasional & SDM',
-            'next_route' => route('storemanager.promosi_event'),
-            'back_route' => route('storemanager.pelayanan'),
-        ];
-
-        $operasionalIndicators = config('kpi_form.store_manager.operasional_sdm.operasional');
-
-        $sdmIndicators = config('kpi_form.store_manager.operasional_sdm.sdm');
-
-        $existingPhotos = [];
-
-        return view('storemanager.operasional_sdm', compact('user', 'stepInfo', 'operasionalIndicators', 'sdmIndicators', 'existingPhotos'));
-    }
-
-    /**
-     * Simpan Langkah 4: Operasional & SDM
-     */
-    public function simpanOperasionalSdm(Request $request)
-    {
-        \App\Services\KpiBackendSubmitter::stashPhotos($request, 'OPS_SOP');
-
-        session([
-            'sm_operasional_sdm' => [
-                'operasional' => $request->input('operasional', []),
-                'sdm' => $request->input('sdm', []),
-                'photos' => $request->input('photos', []),
-                'saved_at' => now()->toDateTimeString(),
-            ]
-        ]);
-
-        return redirect()->route('storemanager.promosi_event')->with('status', 'Operasional & SDM berhasil disimpan!');
-    }
-
-    /**
-     * Langkah 5 dari 5: Promosi & Event (Final Submit)
-     */
-    public function isiPromosiEvent()
-    {
-        $user = $this->currentUser();
-
-        $stepInfo = [
-            'current' => 5,
-            'total' => 5,
-            'title' => 'Promosi & Event',
-            'subtitle' => 'Centang indikator yang tercapai hari ini',
-            'category_name' => 'Promosi & Event',
-            'back_route' => route('storemanager.operasional_sdm'),
-        ];
-
-        // Definisi item: config/kpi_form.php (semua ceklis mulai kosong)
-        $indicators = config('kpi_form.store_manager.promosi_event');
-
-        $existingPhotos = [];
-
-        // Pulihkan centang dari draf / data tersimpan sebelumnya
-        $saved = session('sm_promosi_event') ?? session('sm_capaian_draft');
-        if (is_array($saved)) {
-            foreach ($indicators as &$indicator) {
-                $indicator['checked'] = !empty($saved['indicators'][$indicator['id']]);
-            }
-            unset($indicator);
-        }
-
-        return view('storemanager.promosi_event', compact('user', 'stepInfo', 'indicators', 'existingPhotos'));
-    }
-
-    /**
-     * Simpan Langkah 5: Promosi & Event (Final Submit)
-     */
-    public function simpanPromosiEvent(Request $request)
-    {
-        \App\Services\KpiBackendSubmitter::stashPhotos($request, 'OPS_PROMO');
-
-        // Kirim ke Backend: gabungan item yang dicentang di kelima langkah
-        $checked = array_merge(
-            $this->checkedKeys(session('sm_penjualan.indicators', [])),
-            $this->checkedKeys(session('sm_laba_persediaan.indicators', [])),
-            $this->checkedKeys(session('sm_pelayanan.indicators', [])),
-            $this->checkedKeys(session('sm_operasional_sdm.operasional', [])),
-            $this->checkedKeys(session('sm_operasional_sdm.sdm', [])),
-            $this->checkedKeys($request->input('indicators', [])),
-        );
-        if ($error = $this->kirimCapaianKeBackend($request, self::BACKEND_MAP, $checked, 'storemanager.promosi_event')) {
-            return $error;
-        }
-
-        session([
-            'sm_promosi_event' => [
-                'indicators' => $request->input('indicators', []),
-                'photos' => $request->input('photos', []),
-                'saved_at' => now()->toDateTimeString(),
-                'status' => 'submitted',
-            ]
-        ]);
-
-        return redirect()->route('storemanager.dashboard')->with('status', 'Seluruh capaian Store Manager (5/5 kategori) berhasil dikirim!');
-    }
-
-    /**
-     * Simpan Draf Sementara
-     */
-    public function simpanDraft(Request $request)
-    {
-        session(['sm_capaian_draft' => [
-            'indicators' => $request->input('indicators', []),
-            'drafted_at' => now()->toDateTimeString(),
-        ]]);
-
-        return redirect()->route('storemanager.dashboard')->with('status', 'Draf capaian Store Manager berhasil disimpan.');
-    }
 
     // =========================================================================
     // INTEGRASI BACKEND: APPROVAL TIM (GET/POST /api/reviews/reports)
@@ -649,7 +384,7 @@ class StoreManagerController extends Controller
         $date = KpiHistoryService::dateFromId($id);
         $live = $date ? KpiHistoryService::detail($date) : null;
         abort_unless($live, 404, 'Laporan tidak ditemukan.');
-        [$reportMeta, $revisionNote, $categories] = $this->liveReportDetail($live, route('storemanager.penjualan'));
+        [$reportMeta, $revisionNote, $categories] = $this->liveReportDetail($live, \App\Http\Controllers\KpiFormController::startUrl('store_manager'));
 
         return view('storemanager.detail_riwayat', compact('user', 'reportMeta', 'revisionNote', 'categories'));
     }

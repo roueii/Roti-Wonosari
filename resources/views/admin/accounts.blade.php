@@ -42,7 +42,7 @@
             <div role="alert" style="background: var(--error-100); border: 1px solid var(--error-100); color: var(--error-700); border-radius: 12px; padding: 10px 14px; font-size: var(--fs-14); font-weight: 600; margin-bottom: 12px;">{{ session('error') }}</div>
         @endif
         @unless($isLive)
-            <div role="note" style="background: var(--warning-100); border: 1px dashed var(--warning-500); color: var(--warning-700); border-radius: 12px; padding: 10px 14px; font-size: var(--fs-12); margin-bottom: 12px;">Mode demo: data di bawah adalah contoh. Login dengan akun Backend agar daftar akun bisa dikelola.</div>
+            <div role="note" style="background: var(--warning-100); border: 1px dashed var(--warning-500); color: var(--warning-700); border-radius: 12px; padding: 10px 14px; font-size: var(--fs-12); margin-bottom: 12px;">Data belum tersedia. Server sedang tidak dapat dihubungi, coba muat ulang beberapa saat lagi.</div>
         @endunless
 
         <!-- 3. Pencarian & Tombol Tambah -->
@@ -167,6 +167,29 @@
                                     <span>{{ $acc['active'] ? 'Nonaktifkan Akun Karyawan' : 'Aktifkan Kembali Akun' }}</span>
                                 </button>
                             </form>
+
+                            <!-- Reset kata sandi (PUT /api/admin/users/{id}/password) -->
+                            <form class="edit-employee-form account-extra-form" method="POST" action="{{ route('admin.accounts.password', $acc['id']) }}"
+                                onsubmit="return confirm(@js('Ganti kata sandi akun ' . $acc['name'] . '? Akun ini akan keluar dari semua perangkat.'))">
+                                @csrf
+                                <div class="form-group-item">
+                                    <label for="pw-{{ $acc['id'] }}">Reset Kata Sandi</label>
+                                    <input type="password" id="pw-{{ $acc['id'] }}" name="password" minlength="8" required autocomplete="new-password" placeholder="Kata sandi baru, minimal 8 karakter" />
+                                </div>
+                                <button type="submit" class="btn-form-save account-extra-btn">Simpan Kata Sandi Baru</button>
+                            </form>
+
+                            @if ((string) $acc['id'] !== (string) ($user['id'] ?? ''))
+                                <!-- Hapus akun (DELETE /api/admin/users/{id}); Backend menolak bila akun sudah punya riwayat capaian -->
+                                <form method="POST" action="{{ route('admin.accounts.destroy', $acc['id']) }}"
+                                    onsubmit="return confirm(@js('Hapus akun ' . $acc['name'] . ' secara permanen? Akun yang sudah punya riwayat capaian tidak bisa dihapus, cukup dinonaktifkan.'))">
+                                    @csrf
+                                    <button type="submit" class="btn-deactivate-dashed account-delete-btn">
+                                        <x-icon name="trash" width="15" height="15" />
+                                        <span>Hapus Akun Permanen</span>
+                                    </button>
+                                </form>
+                            @endif
                         </div>
                     </div>
                 @empty

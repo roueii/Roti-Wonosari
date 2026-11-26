@@ -100,7 +100,9 @@
             </div>
         </section>
 
-        <!-- 4. Tombol Logout (Pindah ke Profil Sesuai Permintaan) -->
+        <!-- 4. Tombol Logout (Pindah ke Profil Sesuai Permintaan) -->
+        @include('partials.ganti-sandi')
+
         <form action="{{ route('logout') }}" method="POST" class="logout-form-wrapper">
             @csrf
             <button type="submit" class="logout-action-btn">

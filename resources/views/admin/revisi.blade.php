@@ -88,6 +88,23 @@
                     </div>
 
                     <div class="revisi-detail-content" id="detail-{{ $i }}" @if ($i > 0) style="display: none;" @endif>
+                        @if (count($r['photos']))
+                            <div class="attachment-preview-box">
+                                <div class="attachment-icon-peach">
+                                    <x-icon name="media-image" />
+                                </div>
+                                <div class="attachment-info">
+                                    <strong class="attachment-filename">Foto Bukti ({{ count($r['photos']) }} File)</strong>
+                                    <span class="attachment-time">{{ collect($r['photos'])->pluck('file_name')->implode(', ') }}</span>
+                                    <div class="revisi-photo-links">
+                                        @foreach ($r['photos'] as $n => $photo)
+                                            <a href="{{ $photo['url'] }}" target="_blank" rel="noopener" class="preview-link-btn">Foto {{ $n + 1 }}</a>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
                         <div class="indicators-section-box">
                             <span class="indicators-box-title">STATUS CHECKLIST HARIAN</span>
                             @foreach ($r['indicators'] as $ind)

@@ -79,7 +79,9 @@
             </div>
         </section>
 
-        <!-- 4. Tombol Keluar (Logout) Sesuai Figma -->
+        <!-- 4. Tombol Keluar (Logout) Sesuai Figma -->
+        @include('partials.ganti-sandi')
+
         <form action="{{ route('logout') }}" method="POST" style="margin-bottom: 32px;">
             @csrf
             <button type="submit" style="width: 100%; padding: 15px; border-radius: 14px; border: none; background: var(--primary-500); color: var(--white); font-size: var(--fs-16); font-weight: var(--fw-semibold); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 14px rgba(249, 115, 22, 0.32);">

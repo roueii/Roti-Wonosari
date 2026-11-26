@@ -34,106 +34,114 @@
             </button>
         </header>
 
-        <!-- 2. Horizontal Filter Tabs / Divisi -->
-        <div class="kpi-tabs-scroll-wrapper" role="tablist" aria-label="Pilih Divisi KPI">
-            @foreach($divisions as $div)
-                <button type="button" 
-                        class="kpi-tab-btn {{ $div === $activeDivision ? 'is-active' : '' }}" 
-                        role="tab"
-                        aria-selected="{{ $div === $activeDivision ? 'true' : 'false' }}"
-                        data-division="{{ $div }}"
-                        onclick="switchDivision('{{ $div }}', this)">
-                    {{ $div }}
+        @if (session('status'))
+            <div class="kpi-flash is-success" role="status">{{ session('status') }}</div>
+        @endif
+        @if (session('error') || $errors->any())
+            <div class="kpi-flash is-error" role="alert">{{ session('error') ?? $errors->first() }}</div>
+        @endif
+        @if ($unavailable)
+            <div class="kpi-flash is-error" role="alert">Data belum tersedia. Server sedang tidak dapat dihubungi, coba muat ulang beberapa saat lagi.</div>
+        @endif
+
+        <!-- 2. Tab Bagian (jabatan dari Backend) -->
+        <div class="kpi-tabs-scroll-wrapper" role="tablist" aria-label="Pilih Bagian">
+            @foreach ($panels as $p)
+                <button type="button" class="kpi-tab-btn {{ $p['position_id'] === $active ? 'is-active' : '' }}" role="tab"
+                    aria-selected="{{ $p['position_id'] === $active ? 'true' : 'false' }}"
+                    data-position="{{ $p['position_id'] }}" onclick="switchDivision({{ $p['position_id'] }}, this)">
+                    {{ $p['label'] }}
                 </button>
             @endforeach
         </div>
 
-        <!-- 4. Kontainer Grup KPI untuk setiap Divisi -->
+        <!-- 3. Daftar hal yang dicatat per bagian -->
         <main class="kpi-groups-container" id="kpiGroupsContainer">
-            @foreach($kpiGroups as $divisionName => $groups)
-                <div class="kpi-division-panel {{ $divisionName === $activeDivision ? 'is-visible' : 'is-hidden' }}" 
-                     id="panel-{{ Str::slug($divisionName) }}"
-                     data-division-panel="{{ $divisionName }}">
-                    
-                    @foreach($groups as $groupIndex => $group)
-                        <div class="kpi-group-card {{ $group['expanded'] ? 'is-open' : 'is-collapsed' }}" 
-                             id="group-{{ $divisionName }}-{{ $group['id'] }}">
-                            
-                            <!-- Accordion Header -->
-                            <button type="button" class="kpi-group-header" onclick="toggleKpiGroup('group-{{ $divisionName }}-{{ $group['id'] }}')">
+            @foreach ($panels as $p)
+                <div class="kpi-division-panel {{ $p['position_id'] === $active ? 'is-visible' : 'is-hidden' }}"
+                    data-division-panel="{{ $p['position_id'] }}" data-suggested-weight="{{ $p['suggested_weight'] }}">
+
+                    @forelse ($p['groups'] as $group)
+                        <div class="kpi-group-card is-open" id="group-{{ $p['slug'] }}-{{ $group['id'] }}">
+                            <button type="button" class="kpi-group-header" onclick="toggleKpiGroup('group-{{ $p['slug'] }}-{{ $group['id'] }}')">
                                 <div class="kpi-group-title-box">
                                     <h2 class="kpi-group-title">{{ $group['title'] }}</h2>
-                                    @if(!empty($group['count_text']))
-                                        <span class="kpi-group-subtitle">{{ $group['count_text'] }}</span>
-                                    @endif
+                                    <span class="kpi-group-subtitle">{{ $group['count_text'] }}</span>
                                 </div>
                                 <span class="kpi-group-chevron" aria-hidden="true">
                                     <x-icon name="nav-arrow-up" width="18" height="18" />
                                 </span>
                             </button>
 
-                            <!-- Accordion Body -->
                             <div class="kpi-group-body">
                                 <div class="kpi-items-list">
-                                    @foreach($group['items'] as $item)
-                                        <div class="kpi-item-row" id="kpi-item-{{ $item['id'] }}">
+                                    @foreach ($group['items'] as $item)
+                                        <div class="kpi-item-row" data-form='@json($item['form'])'>
                                             <div class="kpi-item-main">
                                                 <div class="kpi-item-title">{{ $item['name'] }}</div>
-                                                @if(!empty($item['subtitle']))
-                                                    <div class="kpi-item-sub">{{ $item['subtitle'] }}</div>
-                                                @endif
+                                                <div class="kpi-item-sub">{{ $item['subtitle'] }}</div>
                                             </div>
-
                                             <div class="kpi-item-side">
-                                                <span class="kpi-type-badge {{ str_contains($item['badge'], 'Ceklis') ? 'is-ceklis' : 'is-angka' }}">
-                                                    {{ $item['badge'] }}
-                                                </span>
-                                                <button type="button" 
-                                                        class="kpi-options-btn" 
-                                                        aria-label="Opsi indikator {{ $item['name'] }}"
-                                                        onclick="openItemOptions(event, '{{ $item['id'] }}', '{{ addslashes($item['name']) }}')">
-                                                    &middot;&middot;&middot;
-                                                </button>
+                                                <span class="kpi-type-badge {{ str_contains($item['badge'], 'Ceklis') ? 'is-ceklis' : 'is-angka' }}">{{ $item['badge'] }}</span>
+                                                <button type="button" class="kpi-options-btn" aria-label="Opsi untuk {{ $item['name'] }}"
+                                                    onclick="openItemOptions(event, this.closest('.kpi-item-row'))">&middot;&middot;&middot;</button>
                                             </div>
                                         </div>
                                     @endforeach
                                 </div>
 
-                                <!-- Tombol Tambah di Kelompok Ini -->
-                                <button type="button" 
-                                        class="kpi-add-group-action"
-                                        onclick="openAddModal('{{ $group['title'] }}')">
+                                <button type="button" class="kpi-add-group-action" onclick="openAddModal({{ $group['category_id'] ?? 'null' }})">
                                     <x-icon name="plus" width="16" height="16" />
                                     <span>Tambah di kelompok ini</span>
                                 </button>
                             </div>
                         </div>
-                    @endforeach
+                    @empty
+                        <p class="kpi-inactive-empty kpi-empty-panel">Belum ada hal yang dicatat untuk bagian ini. Tekan "Tambah hal yang dicatat" untuk mulai.</p>
+                    @endforelse
 
-                    <!-- Kelompok Nonaktif (Collapsible Section) -->
-                    <div class="kpi-inactive-accordion" id="inactive-{{ Str::slug($divisionName) }}">
-                        <button type="button" class="kpi-inactive-header" onclick="toggleInactive('inactive-{{ Str::slug($divisionName) }}')">
+                    <!-- Nonaktif: hal di daftar yang tidak dipakai bagian ini -->
+                    <div class="kpi-inactive-accordion" id="inactive-{{ $p['slug'] }}">
+                        <button type="button" class="kpi-inactive-header" onclick="toggleInactive('inactive-{{ $p['slug'] }}')">
                             <span class="kpi-inactive-chevron"><x-icon name="nav-arrow-right" width="16" height="16" aria-hidden="true" /></span>
-                            <span class="kpi-inactive-title">Nonaktif (0)</span>
+                            <span class="kpi-inactive-title">Nonaktif ({{ count($p['inactive']) }})</span>
                         </button>
                         <div class="kpi-inactive-body">
-                            <p class="kpi-inactive-empty">Belum ada indikator KPI yang dinonaktifkan di bagian ini.</p>
+                            @forelse ($p['inactive'] as $in)
+                                <div class="kpi-inactive-row">
+                                    <div class="kpi-item-main">
+                                        <div class="kpi-item-title">{{ $in['name'] }}</div>
+                                        <div class="kpi-item-sub">{{ $in['category'] }}{{ $in['is_active'] ? '' : ' · nonaktif di semua bagian' }}</div>
+                                    </div>
+                                    @if ($in['is_active'])
+                                        <form method="POST" action="{{ route('admin.kpi.activate', $in['id']) }}">
+                                            @csrf
+                                            <input type="hidden" name="position_id" value="{{ $p['position_id'] }}">
+                                            <button type="submit" class="kpi-activate-btn">Aktifkan</button>
+                                        </form>
+                                    @endif
+                                </div>
+                            @empty
+                                <p class="kpi-inactive-empty">Semua hal di daftar sudah dipakai bagian ini.</p>
+                            @endforelse
                         </div>
                     </div>
                 </div>
             @endforeach
         </main>
 
-        <!-- 5. Tombol CTA Tambah Hal Yang Dicatat & Footer Hint -->
-        <div class="kpi-bottom-action-wrapper">
-            <button type="button" class="btn-add-kpi-main" onclick="openAddModal('')">
-                <x-icon name="plus" width="18" height="18" />
-                <span>Tambah hal yang dicatat</span>
-            </button>
-            <p class="kpi-swipe-hint">Geser tab untuk melihat bagian lainnya.</p>
-        </div>
+        <!-- 4. Tombol Tambah -->
+        @if ($panels)
+            <div class="kpi-bottom-action-wrapper">
+                <button type="button" class="btn-add-kpi-main" onclick="openAddModal(null)">
+                    <x-icon name="plus" width="18" height="18" />
+                    <span>Tambah hal yang dicatat</span>
+                </button>
+                <p class="kpi-swipe-hint">Geser tab untuk melihat bagian lainnya.</p>
+            </div>
+        @endif
 
-        <!-- 6. Modal Tambah Hal yang Dicatat -->
+        <!-- 5. Modal Tambah / Edit -->
         <div class="kpi-modal-overlay" id="addKpiModal" aria-hidden="true">
             <div class="kpi-modal-sheet" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
                 <div class="kpi-modal-header">
@@ -141,279 +149,265 @@
                     <button type="button" class="kpi-modal-close" onclick="closeAddModal()" aria-label="Tutup form"><x-icon name="cancel" width="16" height="16" aria-hidden="true" /></button>
                 </div>
 
-                <form class="kpi-modal-form" onsubmit="saveNewKpi(event)">
-                    <div class="form-group-field">
-                        <label for="kpiDivisionSelect">Divisi Kerja</label>
-                        <select id="kpiDivisionSelect" class="form-select-kpi" required>
-                            @foreach($divisions as $div)
-                                <option value="{{ $div }}" {{ $div === 'Produksi' ? 'selected' : '' }}>{{ $div }}</option>
+                <form class="kpi-modal-form" id="kpiForm" method="POST" action="{{ route('admin.kpi.store') }}">
+                    @csrf
+                    <input type="hidden" name="position_id" id="kpiPositionInput">
+
+                    <div class="form-group-field" id="existingRow">
+                        <label for="kpiExistingSelect">Ambil dari daftar yang sudah ada</label>
+                        <select id="kpiExistingSelect" name="existing_id" class="form-select-kpi" onchange="toggleExisting()">
+                            <option value="">— Buat hal baru —</option>
+                            @foreach ($catalogOptions as $c)
+                                @if ($c['is_active'])
+                                    <option value="{{ $c['id'] }}">{{ $c['name'] }}</option>
+                                @endif
                             @endforeach
                         </select>
                     </div>
 
-                    <div class="form-group-field">
-                        <label for="kpiGroupSelect">Kelompok / Kategori</label>
-                        <select id="kpiGroupSelect" class="form-select-kpi" required>
-                            <option value="Produktivitas produksi">Produktivitas produksi</option>
-                            <option value="Kualitas produk">Kualitas produk</option>
-                            <option value="Kepatuhan SOP">Kepatuhan SOP</option>
-                            <option value="Kebersihan area produksi">Kebersihan area produksi</option>
-                            <option value="+ Buat Kelompok Baru">+ Buat Kelompok Baru...</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group-field">
-                        <label for="kpiNameInput">Nama Hal / Indikator yang Dicatat</label>
-                        <input type="text" id="kpiNameInput" class="form-input-kpi" placeholder="Contoh: Mengontrol suhu oven, Sanitasi meja..." required />
-                    </div>
-
-                    <div class="form-group-field">
-                        <label>Tipe Isian</label>
-                        <div class="kpi-radio-toggle-group">
-                            <label class="kpi-radio-card">
-                                <input type="radio" name="kpiType" value="checkbox" checked onchange="toggleTypeInputs('checkbox')" />
-                                <span class="radio-card-content">
-                                    <strong>Ceklis (Ya / Tidak)</strong>
-                                    <small>Staf mencentang setelah tugas selesai</small>
-                                </span>
-                            </label>
-                            <label class="kpi-radio-card">
-                                <input type="radio" name="kpiType" value="number" onchange="toggleTypeInputs('number')" />
-                                <span class="radio-card-content">
-                                    <strong>Angka / Nilai</strong>
-                                    <small>Input angka seperti pcs, kg, persen (%)</small>
-                                </span>
-                            </label>
+                    <div class="kpi-new-fields" id="newFields">
+                        <div class="form-group-field">
+                            <label for="kpiGroupSelect">Kelompok</label>
+                            <select id="kpiGroupSelect" name="category_id" class="form-select-kpi">
+                                @foreach ($categories as $c)
+                                    <option value="{{ $c['id'] }}">{{ $c['name'] }}</option>
+                                @endforeach
+                            </select>
                         </div>
+
+                        <div class="form-group-field">
+                            <label for="kpiNameInput">Nama hal yang dicatat</label>
+                            <input type="text" id="kpiNameInput" name="name" class="form-input-kpi" maxlength="255" placeholder="Contoh: Mengontrol suhu oven" />
+                        </div>
+
+                        <div class="form-group-field">
+                            <label for="kpiDescInput">Keterangan (opsional)</label>
+                            <input type="text" id="kpiDescInput" name="description" class="form-input-kpi" maxlength="255" placeholder="Penjelasan singkat untuk karyawan" />
+                        </div>
+
+                        <div class="form-group-field">
+                            <label>Tipe isian</label>
+                            <div class="kpi-radio-toggle-group">
+                                <label class="kpi-radio-card">
+                                    <input type="radio" name="assessment_type" value="YES_NO" checked onchange="toggleTypeInputs()" />
+                                    <span class="radio-card-content">
+                                        <strong>Ceklis (Ya / Tidak)</strong>
+                                        <small>Staf mencentang setelah tugas selesai</small>
+                                    </span>
+                                </label>
+                                <label class="kpi-radio-card">
+                                    <input type="radio" name="assessment_type" value="NUMERIC" onchange="toggleTypeInputs()" />
+                                    <span class="radio-card-content">
+                                        <strong>Angka / Nilai</strong>
+                                        <small>Input angka seperti pcs, kg, persen (%)</small>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="numberOptionsRow" style="display: none;">
+                            <div class="form-group-field">
+                                <label for="kpiUnitInput">Satuan & target</label>
+                                <div class="kpi-dual-inputs">
+                                    <input type="text" id="kpiUnitInput" name="unit" class="form-input-kpi" maxlength="50" placeholder="Satuan (pcs, %, Rp)" />
+                                    <input type="number" id="kpiTargetInput" name="target" class="form-input-kpi" min="0" step="any" placeholder="Target" />
+                                </div>
+                            </div>
+                            <div class="form-group-field">
+                                <label for="kpiCalcSelect">Cara menilai</label>
+                                <select id="kpiCalcSelect" name="calculation_type" class="form-select-kpi">
+                                    <option value="HIGHER_IS_BETTER">Makin tinggi makin baik (minimal target)</option>
+                                    <option value="LOWER_IS_BETTER">Makin rendah makin baik (maksimal target)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <label class="kpi-check-field">
+                            <input type="hidden" name="requires_evidence" value="0">
+                            <input type="checkbox" id="kpiEvidenceInput" name="requires_evidence" value="1">
+                            <span>Wajib foto bukti</span>
+                        </label>
                     </div>
 
-                    <div class="form-group-field" id="numberOptionsRow" style="display: none;">
-                        <label for="kpiUnitInput">Satuan & Target (Opsional)</label>
+                    <div class="form-group-field">
+                        <label for="kpiWeightInput">Bobot & frekuensi</label>
                         <div class="kpi-dual-inputs">
-                            <input type="text" id="kpiUnitInput" class="form-input-kpi" placeholder="Satuan (misal: pcs, %, Rp)" />
-                            <input type="text" id="kpiTargetInput" class="form-input-kpi" placeholder="Target / Standar (misal: Maks 2%)" />
+                            <input type="number" id="kpiWeightInput" name="weight" class="form-input-kpi" min="0.01" max="100" step="0.01" required placeholder="Bobot %" />
+                            <select id="kpiFreqSelect" name="frequency" class="form-select-kpi">
+                                @foreach ($frequencies as $val => $lbl)
+                                    <option value="{{ $val }}">{{ $lbl }}</option>
+                                @endforeach
+                            </select>
                         </div>
+                        <small class="kpi-field-hint">Bobot lain di bagian ini menyesuaikan otomatis agar total tetap 100%.</small>
                     </div>
+
+                    <p class="kpi-field-hint" id="editNote" hidden>Perubahan nama, kelompok, tipe, dan foto berlaku di semua bagian yang memakai hal ini.</p>
 
                     <div class="kpi-modal-actions">
                         <button type="button" class="btn-kpi-cancel" onclick="closeAddModal()">Batal</button>
-                        <button type="submit" class="btn-kpi-submit">Simpan Hal Ini</button>
+                        <button type="submit" class="btn-kpi-submit" id="kpiSubmitBtn">Simpan Hal Ini</button>
                     </div>
                 </form>
             </div>
         </div>
 
-        <!-- 7. Action Sheet / Options Menu Popup for 3-dots -->
+        <!-- 6. Menu opsi (titik tiga) -->
         <div class="kpi-options-menu" id="kpiOptionsMenu">
-            <button type="button" class="options-menu-item" onclick="triggerEditOption()">
+            <button type="button" class="options-menu-item" onclick="openEditModal()">
                 <x-icon name="edit-pencil" width="16" height="16" />
                 <span>Edit Hal Ini</span>
             </button>
-            <button type="button" class="options-menu-item" onclick="triggerDeactivateOption()">
+            <button type="button" class="options-menu-item" onclick="submitAction('deactivate')">
                 <x-icon name="prohibition" width="16" height="16" />
                 <span>Pindahkan ke Nonaktif</span>
             </button>
-            <button type="button" class="options-menu-item is-danger" onclick="triggerDeleteOption()">
+            <button type="button" class="options-menu-item is-danger" onclick="submitAction('destroy')">
                 <x-icon name="trash" width="16" height="16" />
                 <span>Hapus Permanen</span>
             </button>
         </div>
+        <form method="POST" id="kpiActionForm" hidden>
+            @csrf
+            <input type="hidden" name="position_id" id="kpiActionPosition">
+        </form>
 
-        <!-- 8. Side Menu Drawer Partial -->
         @include('admin.partials.drawer')
-
-
-        <!-- Toast: hanya muncul sesaat setelah ada aksi -->
-        <div class="toast-msg" id="toastMsg" role="status" aria-live="polite"></div>
     </div>
 
-    <!-- Script Interaktif Kelola KPI -->
     <script src="{{ asset('js/drawer.js') }}"></script>
     <script>
-        let currentTargetItemId = null;
-        let currentTargetItemName = '';
+        const ROUTES = {
+            store: @json(route('admin.kpi.store')),
+            update: @json(route('admin.kpi.update', '__ID__')),
+            deactivate: @json(route('admin.kpi.deactivate', '__ID__')),
+            destroy: @json(route('admin.kpi.destroy', '__ID__')),
+        };
+        let activePosition = {{ (int) $active }};
+        let currentItem = null;
 
-        // Switch division tabs
-        function switchDivision(divisionName, btnElement) {
-            // Update tab active classes
-            document.querySelectorAll('.kpi-tab-btn').forEach(btn => {
-                btn.classList.remove('is-active');
-                btn.setAttribute('aria-selected', 'false');
+        function switchDivision(positionId, btn) {
+            activePosition = positionId;
+            document.querySelectorAll('.kpi-tab-btn').forEach(b => {
+                b.classList.toggle('is-active', b === btn);
+                b.setAttribute('aria-selected', b === btn ? 'true' : 'false');
             });
-            if (btnElement) {
-                btnElement.classList.add('is-active');
-                btnElement.setAttribute('aria-selected', 'true');
-            }
-
-            // Show matching division panel
             document.querySelectorAll('.kpi-division-panel').forEach(panel => {
-                panel.classList.remove('is-visible');
-                panel.classList.add('is-hidden');
+                const show = panel.dataset.divisionPanel == positionId;
+                panel.classList.toggle('is-visible', show);
+                panel.classList.toggle('is-hidden', !show);
             });
-
-            const targetPanel = document.querySelector(`[data-division-panel="${divisionName}"]`);
-            if (targetPanel) {
-                targetPanel.classList.remove('is-hidden');
-                targetPanel.classList.add('is-visible');
-            }
-
-            // Sync select in modal
-            const divisionSelect = document.getElementById('kpiDivisionSelect');
-            if (divisionSelect) {
-                divisionSelect.value = divisionName;
-            }
+            history.replaceState(null, '', '?bagian=' + positionId);
         }
 
-        // Toggle KPI group accordion (expand / collapse)
         function toggleKpiGroup(groupId) {
             const card = document.getElementById(groupId);
             if (!card) return;
-
-            if (card.classList.contains('is-open')) {
-                card.classList.remove('is-open');
-                card.classList.add('is-collapsed');
-            } else {
-                card.classList.remove('is-collapsed');
-                card.classList.add('is-open');
-            }
+            card.classList.toggle('is-open');
+            card.classList.toggle('is-collapsed');
         }
 
-        // Toggle inactive group
         function toggleInactive(id) {
-            const el = document.getElementById(id);
-            if (el) {
-                el.classList.toggle('is-open');
-            }
+            document.getElementById(id)?.classList.toggle('is-open');
         }
 
-        // Open modal to add KPI
-        function openAddModal(groupTitle) {
-            const modal = document.getElementById('addKpiModal');
-            const groupSelect = document.getElementById('kpiGroupSelect');
-            
-            if (groupTitle && groupSelect) {
-                // Check if option exists, otherwise select or set it
-                let exists = false;
-                for (let i = 0; i < groupSelect.options.length; i++) {
-                    if (groupSelect.options[i].value === groupTitle) {
-                        groupSelect.selectedIndex = i;
-                        exists = true;
-                        break;
-                    }
-                }
-                if (!exists) {
-                    const opt = document.createElement('option');
-                    opt.value = groupTitle;
-                    opt.textContent = groupTitle;
-                    opt.selected = true;
-                    groupSelect.insertBefore(opt, groupSelect.firstChild);
-                }
-            }
+        function el(id) { return document.getElementById(id); }
 
-            if (modal) {
-                modal.classList.add('is-active');
-                modal.setAttribute('aria-hidden', 'false');
-                document.getElementById('kpiNameInput').focus();
-            }
+        function toggleTypeInputs() {
+            const numeric = document.querySelector('input[name="assessment_type"]:checked')?.value === 'NUMERIC';
+            el('numberOptionsRow').style.display = numeric ? 'block' : 'none';
         }
 
-        // Close modal
+        function toggleExisting() {
+            const useExisting = !!el('kpiExistingSelect').value;
+            el('newFields').style.display = useExisting ? 'none' : '';
+            el('kpiNameInput').required = !useExisting;
+        }
+
+        function suggestedWeight() {
+            return document.querySelector(`[data-division-panel="${activePosition}"]`)?.dataset.suggestedWeight || 100;
+        }
+
+        function showModal(title) {
+            el('modalTitle').textContent = title;
+            el('kpiPositionInput').value = activePosition;
+            el('addKpiModal').classList.add('is-active');
+            el('addKpiModal').setAttribute('aria-hidden', 'false');
+        }
+
+        function openAddModal(categoryId) {
+            const f = el('kpiForm');
+            f.reset();
+            f.action = ROUTES.store;
+            el('existingRow').style.display = '';
+            el('editNote').hidden = true;
+            el('kpiSubmitBtn').textContent = 'Simpan Hal Ini';
+            if (categoryId) el('kpiGroupSelect').value = categoryId;
+            el('kpiWeightInput').value = suggestedWeight();
+            toggleExisting();
+            toggleTypeInputs();
+            showModal('Tambah Hal yang Dicatat');
+            el('kpiNameInput').focus();
+        }
+
+        function openEditModal() {
+            el('kpiOptionsMenu').classList.remove('is-visible');
+            if (!currentItem) return;
+            const d = currentItem;
+            const f = el('kpiForm');
+            f.reset();
+            f.action = ROUTES.update.replace('__ID__', d.indicator_id);
+            el('existingRow').style.display = 'none';
+            el('kpiExistingSelect').value = '';
+            toggleExisting();
+            el('kpiGroupSelect').value = d.category_id;
+            el('kpiNameInput').value = d.name;
+            el('kpiDescInput').value = d.description || '';
+            document.querySelector(`input[name="assessment_type"][value="${d.assessment_type}"]`).checked = true;
+            el('kpiUnitInput').value = d.unit || '';
+            el('kpiTargetInput').value = d.assessment_type === 'NUMERIC' ? d.target : '';
+            el('kpiCalcSelect').value = d.calculation_type;
+            el('kpiEvidenceInput').checked = d.requires_evidence;
+            el('kpiWeightInput').value = d.weight;
+            el('kpiFreqSelect').value = d.frequency;
+            el('editNote').hidden = false;
+            el('kpiSubmitBtn').textContent = 'Simpan Perubahan';
+            toggleTypeInputs();
+            showModal('Edit Hal yang Dicatat');
+        }
+
         function closeAddModal() {
-            const modal = document.getElementById('addKpiModal');
-            if (modal) {
-                modal.classList.remove('is-active');
-                modal.setAttribute('aria-hidden', 'true');
-            }
+            el('addKpiModal').classList.remove('is-active');
+            el('addKpiModal').setAttribute('aria-hidden', 'true');
         }
 
-        // Toggle radio type inputs
-        function toggleTypeInputs(type) {
-            const row = document.getElementById('numberOptionsRow');
-            if (row) {
-                row.style.display = type === 'number' ? 'block' : 'none';
-            }
-        }
-
-        // Save new KPI
-        function saveNewKpi(e) {
-            e.preventDefault();
-            const name = document.getElementById('kpiNameInput').value.trim();
-            const division = document.getElementById('kpiDivisionSelect').value;
-            const group = document.getElementById('kpiGroupSelect').value;
-
-            if (!name) return;
-
-            closeAddModal();
-            showToast(`Berhasil menambahkan "${name}" ke bagian ${division}!`);
-            document.getElementById('kpiNameInput').value = '';
-        }
-
-        // Options menu for 3-dots
-        function openItemOptions(event, itemId, itemName) {
+        function openItemOptions(event, row) {
             event.stopPropagation();
-            currentTargetItemId = itemId;
-            currentTargetItemName = itemName;
-
-            const menu = document.getElementById('kpiOptionsMenu');
-            const btn = event.currentTarget;
-            const rect = btn.getBoundingClientRect();
-
+            currentItem = JSON.parse(row.dataset.form);
+            const menu = el('kpiOptionsMenu');
+            const rect = event.currentTarget.getBoundingClientRect();
             menu.style.top = `${rect.bottom + window.scrollY + 6}px`;
-            menu.style.left = `${Math.min(rect.left - 130, window.innerWidth - 180)}px`;
+            menu.style.left = `${Math.max(8, Math.min(rect.left - 130, window.innerWidth - 190))}px`;
             menu.classList.add('is-visible');
         }
 
-        // Hide options menu when clicking outside
-        document.addEventListener('click', function(e) {
-            const menu = document.getElementById('kpiOptionsMenu');
-            if (menu && !menu.contains(e.target)) {
-                menu.classList.remove('is-visible');
-            }
+        document.addEventListener('click', function (e) {
+            const menu = el('kpiOptionsMenu');
+            if (menu && !menu.contains(e.target)) menu.classList.remove('is-visible');
         });
 
-        function triggerEditOption() {
-            document.getElementById('kpiOptionsMenu').classList.remove('is-visible');
-            showToast(`Mengedit hal: ${currentTargetItemName}`);
+        function submitAction(kind) {
+            el('kpiOptionsMenu').classList.remove('is-visible');
+            if (!currentItem) return;
+            const msg = kind === 'destroy'
+                ? `Hapus "${currentItem.name}" secara permanen? Bila masih dipakai bagian lain, hal ini hanya dilepas dari bagian ini.`
+                : `Pindahkan "${currentItem.name}" ke Nonaktif? Karyawan bagian ini tidak lagi mengisinya.`;
+            if (!confirm(msg)) return;
+            const f = el('kpiActionForm');
+            f.action = ROUTES[kind].replace('__ID__', currentItem.indicator_id);
+            el('kpiActionPosition').value = activePosition;
+            f.submit();
         }
-
-        function triggerDeactivateOption() {
-            document.getElementById('kpiOptionsMenu').classList.remove('is-visible');
-            showToast(`"${currentTargetItemName}" dipindahkan ke Nonaktif.`);
-            const row = document.getElementById(`kpi-item-${currentTargetItemId}`);
-            if (row) {
-                row.style.opacity = '0.4';
-                row.style.textDecoration = 'line-through';
-            }
-        }
-
-        function triggerDeleteOption() {
-            document.getElementById('kpiOptionsMenu').classList.remove('is-visible');
-            if (confirm(`Hapus "${currentTargetItemName}" secara permanen?`)) {
-                const row = document.getElementById(`kpi-item-${currentTargetItemId}`);
-                if (row) {
-                    row.remove();
-                }
-                showToast(`"${currentTargetItemName}" berhasil dihapus.`);
-            }
-        }
-
-        // Toast feedback
-        let toastTimer;
-        function showToast(msg) {
-            const toast = document.getElementById('toastMsg');
-            if (!toast) return;
-
-            clearTimeout(toastTimer);
-            toast.textContent = msg;
-            toast.classList.add('show');
-            toastTimer = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3200);
-        }
-
-        // Drawer navigation
-        document.addEventListener('DOMContentLoaded', function () {
-        });
     </script>
 </body>
 

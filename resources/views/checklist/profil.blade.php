@@ -50,6 +50,8 @@
             </div>
         </div>
     </section>
+
+    @include('partials.ganti-sandi')
 
     <form action="{{ route('logout') }}" method="POST">
         @csrf

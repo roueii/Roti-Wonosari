@@ -69,7 +69,7 @@
                 {{ $revisionNote['text'] ?? '"Foto bukti Penjualan kurang jelas, mohon upload ulang."' }}
             </div>
 
-            <a href="{{ $revisionNote['cta_url'] ?? route('storemanager.penjualan') }}" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box; padding: 14px; border-radius: 14px; background: var(--primary-500); color: var(--white); font-size: var(--fs-14); font-weight: var(--fw-semibold); text-decoration: none; box-shadow: 0 4px 14px rgba(249, 115, 22, 0.32);">
+            <a href="{{ $revisionNote['cta_url'] ?? route('storemanager.kpi') }}" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box; padding: 14px; border-radius: 14px; background: var(--primary-500); color: var(--white); font-size: var(--fs-14); font-weight: var(--fw-semibold); text-decoration: none; box-shadow: 0 4px 14px rgba(249, 115, 22, 0.32);">
                 <span>{{ $revisionNote['cta_title'] ?? 'PERBAIKI CAPAIAN' }}</span>
                 <x-icon name="arrow-right" width="18" height="18" aria-hidden="true" />
             </a>

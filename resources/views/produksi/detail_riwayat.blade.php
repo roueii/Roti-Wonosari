@@ -64,7 +64,7 @@
             </div>
 
             <!-- Tombol Aksi Perbaiki Capaian -->
-            <a href="{{ $detailRiwayat['revision_note']['repair_url'] ?? route('produksi.hasil_produksi') }}" class="fl-dr-btn-repair">
+            <a href="{{ $detailRiwayat['revision_note']['repair_url'] ?? route('produksi.kpi') }}" class="fl-dr-btn-repair">
                 <span>{{ $detailRiwayat['revision_note']['repair_label'] ?? 'PERBAIKI CAPAIAN' }}</span>
                 <x-icon name="arrow-right" width="18" height="18" aria-hidden="true" />
             </a>

@@ -6,12 +6,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Kirim capaian harian dari form FE ke Backend (POST /api/my-kpis/submissions).
+ * Kirim capaian dari form Isi Capaian ke Backend (POST /api/my-kpis/submissions).
  *
- * Form FE (Figma) berisi item ceklis rinci, sedangkan indikator Backend bersifat ringkasan.
- * Setiap role memetakan item FE -> KODE indikator Backend; beberapa item boleh menunjuk kode yang sama
- * dan indikator itu bernilai "Ya" hanya bila SEMUA item terkaitnya dicentang.
- * Foto bukti yang diunggah di form diteruskan ke POST /api/kpi-submissions/{id}/evidences.
+ * Form dibuat otomatis dari indikator jabatan di Backend (lihat KpiFormController), sehingga setiap
+ * isian langsung = satu indikator: ceklis -> answer_yes_no, angka -> numeric_value.
+ * Foto bukti diteruskan ke POST /api/kpi-submissions/{id}/evidences.
  */
 class KpiBackendSubmitter
 {
@@ -19,6 +18,7 @@ class KpiBackendSubmitter
 
     /**
      * Simpan sementara foto dari request (field $field) untuk indikator $code sampai laporan dikirim.
+     * Foto yang dipilih ulang untuk indikator yang sama menggantikan pilihan sebelumnya.
      */
     public static function stashPhotos(Request $request, string $code, string $field = 'photos'): void
     {
@@ -28,59 +28,55 @@ class KpiBackendSubmitter
             return;
         }
 
-        $dir = self::PHOTO_DIR . '/' . session()->getId();
-        $stored = session("kpi_photos.{$code}", []);
-        foreach ($files as $file) {
+        self::forgetPhotos($code);
+        // Folder per indikator: foto yang sama bisa dipakai beberapa indikator wajib foto di satu langkah
+        $dir = self::PHOTO_DIR . '/' . session()->getId() . '/' . $code;
+        $stored = [];
+        foreach (array_slice($files, 0, 5) as $file) {
             $stored[] = [
                 'path' => $file->store($dir),
                 'name' => $file->getClientOriginalName(),
             ];
         }
-        session(["kpi_photos.{$code}" => array_slice($stored, -5)]);
+        session(["kpi_photos.{$code}" => $stored]);
+    }
+
+    /** Jumlah foto yang sudah dipilih (belum terkirim) untuk indikator $code. */
+    public static function stashedCount(string $code): int
+    {
+        return count(session("kpi_photos.{$code}", []));
+    }
+
+    private static function forgetPhotos(string $code): void
+    {
+        foreach (session("kpi_photos.{$code}", []) as $photo) {
+            Storage::delete($photo['path']);
+        }
+        session()->forget("kpi_photos.{$code}");
     }
 
     /**
-     * @param  array<string, string>  $map          item key FE => kode indikator Backend
-     * @param  array<int, string>     $checkedKeys  item yang dicentang (dari semua langkah)
-     * @param  array<int, string>|null $onlyKeys    batasi ke item ini (mis. draf satu langkah); null = semua
-     * @return array|null  hasil BackendApiService::send, atau null bila sesi tidak terhubung ke Backend
+     * Kirim isian ke Backend.
+     *
+     * @param  array<int, array>  $items   [{position_kpi_id, answer_yes_no|numeric_value}]
+     * @param  array<string, array>  $byCode  KPI jabatan dari GET /api/my-kpis, dikelompokkan per kode indikator
+     * @param  bool  $submit  false = simpan sebagai draf saja
      */
-    public static function submit(array $map, array $checkedKeys, bool $submit = true, ?array $onlyKeys = null): ?array
+    public static function send(array $items, array $byCode, bool $submit): array
     {
-        if (! $map || ! BackendApiService::connected()) {
-            return null;
-        }
-
-        $kpis = BackendApiService::fetch('my-kpis')['data'] ?? null;
-        if (! is_array($kpis)) {
-            return ['ok' => false, 'message' => 'Data KPI dari Backend tidak dapat dimuat. Coba lagi.', 'first_error' => null];
-        }
-        $byCode = collect($kpis)->filter(fn ($pk) => ! empty($pk['indicator']['code']))
-            ->keyBy(fn ($pk) => $pk['indicator']['code']);
-
-        $keys = $onlyKeys ?? array_keys($map);
-        $groups = [];
-        foreach ($map as $key => $code) {
-            $groups[$code][] = $key;
-        }
-
-        $items = [];
-        foreach ($groups as $code => $codeKeys) {
-            $pk = $byCode[$code] ?? null;
-            if (! $pk || array_diff($codeKeys, $keys)
-                || in_array($pk['submission']['status'] ?? null, ['SUBMITTED', 'APPROVED'], true)) {
-                continue;
-            }
-            $done = ! array_diff($codeKeys, $checkedKeys);
-            $items[] = ($pk['input_type'] ?? 'YES_NO') === 'YES_NO'
-                ? ['position_kpi_id' => $pk['id'], 'answer_yes_no' => $done]
-                : ['position_kpi_id' => $pk['id'], 'numeric_value' => $done ? (float) ($pk['target'] ?: 1) : 0];
-        }
-
         if (! $items) {
-            return $submit
-                ? ['ok' => false, 'message' => 'Capaian periode ini sudah dikirim ke Backend dan menunggu/selesai direview.', 'first_error' => null]
-                : null;
+            return ['ok' => false, 'message' => 'Tidak ada isian yang bisa dikirim. Capaian periode ini sudah dikirim dan sedang/selesai ditinjau.', 'first_error' => null];
+        }
+
+        // Revisi: foto baru menggantikan foto lama (Backend maks. 5 foto per indikator).
+        // Dilakukan sebelum disimpan ulang sebagai draf, karena riwayat Backend tidak memuat isian draf.
+        if ($submit) {
+            foreach (array_keys(array_filter(session('kpi_photos', []))) as $code) {
+                $old = $byCode[$code]['submission'] ?? null;
+                if ($old && (int) ($old['evidences_count'] ?? 0) > 0) {
+                    self::deleteOldEvidences((int) $old['id'], $old['report_date'] ?? null);
+                }
+            }
         }
 
         // 1) Simpan sebagai draf untuk mendapatkan id capaian, 2) unggah foto bukti, 3) kirim
@@ -89,7 +85,7 @@ class KpiBackendSubmitter
             return $draft;
         }
 
-        $uploadError = self::uploadPhotos($draft['data'] ?? [], $byCode->all());
+        $uploadError = self::uploadPhotos($draft['data'] ?? [], $byCode);
         if ($uploadError) {
             return ['ok' => false, 'message' => $uploadError, 'first_error' => $uploadError];
         }
@@ -109,8 +105,7 @@ class KpiBackendSubmitter
                 continue;
             }
 
-            $remaining = max(0, 5 - (int) ($pk['submission']['evidences_count'] ?? 0));
-            foreach (array_slice($photos, 0, $remaining) as $photo) {
+            foreach (array_slice($photos, 0, 5) as $photo) {
                 if (! Storage::exists($photo['path'])) {
                     continue;
                 }
@@ -130,5 +125,24 @@ class KpiBackendSubmitter
         }
 
         return null;
+    }
+
+    /**
+     * Hapus foto bukti lama sebuah capaian (DELETE /api/kpi-submissions/{id}/evidences/{evidence}).
+     * Id foto diambil dari detail riwayat tanggal laporan itu.
+     */
+    private static function deleteOldEvidences(int $submissionId, ?string $reportDate): void
+    {
+        if (! $reportDate) {
+            return;
+        }
+
+        $detail = BackendApiService::fetch('my-kpis/history/' . substr($reportDate, 0, 10))['data'] ?? [];
+        $indicators = collect($detail['categories'] ?? [])->flatMap(fn ($c) => $c['indicators'] ?? [])
+            ->merge($detail['indicators'] ?? []);
+
+        foreach ($indicators->firstWhere('id', $submissionId)['evidences'] ?? [] as $evidence) {
+            BackendApiService::send('DELETE', "kpi-submissions/{$submissionId}/evidences/{$evidence['id']}");
+        }
     }
 }

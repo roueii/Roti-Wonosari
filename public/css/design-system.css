@@ -2810,3 +2810,128 @@ span > .ds-icon {
 .step-error svg {
   flex-shrink: 0;
 }
+
+/* ===== Profil: Ganti Kata Sandi (partials/ganti-sandi) ===== */
+.pw-section {
+  margin: 16px 0;
+}
+
+.pw-heading {
+  margin: 0 0 8px;
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.04em;
+  color: var(--neutral-500);
+}
+
+.pw-card {
+  background: var(--white);
+  border: 1px solid var(--secondary-100);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.pw-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  color: var(--neutral-900);
+  cursor: pointer;
+}
+
+.pw-toggle-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pw-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: var(--primary-50, #fff7ed);
+  color: var(--primary-500);
+}
+
+.pw-caret {
+  color: var(--neutral-400);
+  transition: transform 0.2s ease;
+}
+
+.pw-card.is-open .pw-caret {
+  transform: rotate(180deg);
+}
+
+.pw-body {
+  display: none;
+  padding: 0 16px 16px;
+}
+
+.pw-card.is-open .pw-body {
+  display: block;
+}
+
+.pw-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pw-form label {
+  margin-top: 6px;
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  color: var(--neutral-700);
+}
+
+.pw-form input {
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--secondary-100);
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: var(--fs-14);
+  background: var(--neutral-50);
+}
+
+.pw-form input:focus {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 1px;
+}
+
+.pw-error {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  color: var(--error-700);
+}
+
+.pw-hint {
+  margin: 8px 0 0;
+  font-size: var(--fs-12);
+  line-height: 1.5;
+  color: var(--neutral-500);
+}
+
+.pw-submit {
+  margin-top: 10px;
+  height: 44px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--primary-500);
+  color: var(--white);
+  font-family: inherit;
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+}

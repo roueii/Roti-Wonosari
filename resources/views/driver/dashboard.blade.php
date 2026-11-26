@@ -101,7 +101,7 @@
             </div>
 
             <!-- Banner Utama Oranye: Mulai Isi Capaian Hari Ini -->
-            <a href="{{ $dailyTask['preview_items'][0]['url'] }}" class="fl-task-banner" style="text-decoration: none;" aria-label="Mulai mengisi capaian driver hari ini">
+            <a href="{{ $dailyTask['start_route'] }}" class="fl-task-banner" style="text-decoration: none;" aria-label="Mulai mengisi capaian driver hari ini">
                 <div class="fl-task-banner-content">
                     <span class="fl-task-banner-title">{{ $dailyTask['banner_title'] }}</span>
                     <div class="fl-task-banner-meta">

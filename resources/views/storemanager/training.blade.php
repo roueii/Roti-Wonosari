@@ -45,7 +45,7 @@
 <body>
     <div class="app-container">
         <header class="tr-header">
-            <a href="{{ route('storemanager.operasional_sdm') }}" class="fl-step-close-btn" aria-label="Kembali ke Operasional & SDM">
+            <a href="{{ route('storemanager.dashboard') }}" class="fl-step-close-btn" aria-label="Kembali ke beranda">
                 <x-icon name="arrow-left" />
             </a>
             <span class="fl-step-badge" style="background: var(--primary-50); border: 1px solid var(--primary-200); color: var(--primary-700); font-size: var(--fs-12); font-weight: var(--fw-semibold); padding: 4px 10px; border-radius: 6px;">STORE MANAGER</span>

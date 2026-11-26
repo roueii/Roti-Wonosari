@@ -61,7 +61,7 @@
                 <span class="fl-dr-revision-time-chip">{{ $revisionNote['time'] ?? '25 Okt, 08:30 WIB' }}</span>
             </div>
             <div class="fl-dr-revision-bubble">{{ $revisionNote['text'] ?? '"Foto bukti Penjualan kurang jelas, mohon upload ulang."' }}</div>
-            <a href="{{ $revisionNote['cta_url'] ?? route('frontliner.penjualan') }}" class="fl-dr-btn-repair">
+            <a href="{{ $revisionNote['cta_url'] ?? route('frontliner.kpi') }}" class="fl-dr-btn-repair">
                 <span>{{ $revisionNote['cta_title'] ?? 'PERBAIKI CAPAIAN' }}</span>
                 <x-icon name="arrow-right" width="18" height="18" aria-hidden="true" />
             </a>

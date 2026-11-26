@@ -78,7 +78,9 @@
             </div>
         </section>
 
-        <!-- 4. ACTION BUTTON: Keluar (Logout) Sesuai Desain Figma -->
+        <!-- 4. ACTION BUTTON: Keluar (Logout) Sesuai Desain Figma -->
+        @include('partials.ganti-sandi')
+
         <form action="{{ route('logout') }}" method="POST" id="logoutForm">
             @csrf
             <button type="submit" class="fl-btn-logout">

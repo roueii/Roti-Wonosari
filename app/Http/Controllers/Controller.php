@@ -24,36 +24,6 @@ class Controller extends BaseController
     }
 
     /**
-     * Kirim seluruh capaian harian ke Backend (lihat KpiBackendSubmitter).
-     * Mengembalikan respons error (kembali ke $backRoute) bila Backend menolak, atau null bila berhasil /
-     * sesi tidak terhubung ke Backend (akun demo).
-     */
-    protected function kirimCapaianKeBackend(\Illuminate\Http\Request $request, array $map, array $checkedKeys, string $backRoute)
-    {
-        $res = \App\Services\KpiBackendSubmitter::submit($map, array_values(array_map('strval', $checkedKeys)));
-        if (! $res || $res['ok']) {
-            return null;
-        }
-
-        $message = $res['first_error'] ?? $res['message'];
-        if ($request->expectsJson() || $request->ajax()) {
-            return response()->json(['success' => false, 'message' => $message], 422);
-        }
-
-        return redirect()->route($backRoute)->withErrors(['step' => $message]);
-    }
-
-    /** Kunci item yang dicentang dari input form: daftar nilai (indicators[]) atau kunci asosiatif (indicators[key]=1). */
-    protected function checkedKeys($input): array
-    {
-        $input = (array) $input;
-
-        return array_is_list($input)
-            ? array_map('strval', $input)
-            : array_map('strval', array_keys(array_filter($input)));
-    }
-
-    /**
      * Data profil: email = email yang dipakai saat login, "Bergabung Sejak" = tanggal akun dibuat.
      * Tanggal dibuat diambil dari session (diisi saat login); jika Backend tidak mengirimnya -> "Belum tersedia".
      */

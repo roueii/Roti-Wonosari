@@ -378,3 +378,75 @@
   font-size: var(--fs-12);
   color: var(--neutral-400);
 }
+
+/* ===== Form Isi Capaian otomatis dari Kelola KPI (KpiFormController) ===== */
+.kf-item-meta {
+  display: block;
+  margin-top: 4px;
+  font-size: var(--fs-12);
+  font-weight: 500;
+  color: var(--neutral-400);
+}
+
+.kf-item-note {
+  display: block;
+  margin-top: 4px;
+  font-size: var(--fs-12);
+  font-weight: 600;
+  color: var(--error-700);
+}
+
+.kf-number-card {
+  background: var(--white);
+  border: 1px solid var(--secondary-100);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.kf-number-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.kf-number-input {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--secondary-100);
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: var(--fs-16);
+  font-weight: 600;
+  color: var(--neutral-900);
+  background: var(--neutral-50);
+}
+
+.kf-number-input:focus {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 1px;
+}
+
+.kf-number-unit {
+  flex-shrink: 0;
+  font-size: var(--fs-14);
+  font-weight: 600;
+  color: var(--neutral-500);
+}
+
+.driver-check-card.is-locked,
+.kf-number-card.is-locked {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.kf-photo-note {
+  margin: -6px 0 12px;
+  font-size: var(--fs-12);
+  color: var(--success-700);
+}
