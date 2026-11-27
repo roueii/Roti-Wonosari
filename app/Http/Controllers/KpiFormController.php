@@ -223,7 +223,8 @@ class KpiFormController extends Controller
         [$answers] = $this->readAnswers($request, $steps[$step]['items']);
         session([$this->sessionKey($role, $step) => $answers]);
 
-        $items = $this->payload($role, [$step => $steps[$step]], true);
+        // Simpan semua yang sudah diisi (langkah ini + langkah sebelumnya yang sudah di-"Lanjut")
+        $items = $this->payload($role, $steps, true);
         $res = $items ? KpiBackendSubmitter::send($items, $byCode, false) : ['ok' => true];
 
         return response()->json([

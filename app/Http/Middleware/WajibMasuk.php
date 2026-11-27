@@ -28,6 +28,14 @@ class WajibMasuk
             return redirect()->route(AuthController::dashboardRoute($role));
         }
 
-        return $next($request);
+        $response = $next($request);
+
+        // Data halaman ini selalu berasal dari Backend: jangan disimpan browser (termasuk back-forward cache),
+        // supaya tombol Kembali / tab lama tidak menampilkan data usang, dan halaman tidak terbuka lagi setelah logout.
+        $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0, private');
+        $response->headers->set('Pragma', 'no-cache');
+        $response->headers->set('Expires', '0');
+
+        return $response;
     }
 }
